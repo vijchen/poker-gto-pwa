@@ -32,7 +32,7 @@
           <button class="btn-next" @click="nextQuiz">下一题 →</button>
         </div>
       </div>
-      <div v-else class="complete"><p>🎉 完成！</p><button class="btn-next" @click="resetQuiz">重来</button></div>
+      <div v-if="quizTotal > 0 && !quizAnswered && quizTotal % 20 === 0" class="milestone"><p>🎯 已完成 {{ quizTotal }} 题！正确率 {{ Math.round(quizCorrect/quizTotal*100) }}%</p><button class="btn-next" @click="nextQuiz">继续练习 →</button><button class="btn-next" style="margin-top:6px;opacity:0.6" @click="resetQuiz">重置统计</button></div>
     </template>
   </div>
 </template>
@@ -52,36 +52,36 @@ function adjustBet(d:number){bet.value=Math.max(0.5,bet.value+d)}
 function adjustOuts(d:number){outs.value=Math.max(0,Math.min(20,outs.value+d))}
 
 interface OQ{pot:number;bet:number;outs:number;street:'flop'|'turn';desc:string}
-const quizData:OQ[]=[
-  {pot:100,bet:50,outs:9,street:'flop',desc:'翻牌同花听牌(9 outs)半池'},
-  {pot:80,bet:80,outs:8,street:'turn',desc:'转牌两头顺子(8 outs)全池'},
-  {pot:120,bet:40,outs:15,street:'flop',desc:'翻牌combo draw(15 outs)1/3池'},
-  {pot:200,bet:100,outs:4,street:'turn',desc:'转牌卡顺(4 outs)半池'},
-  {pot:60,bet:60,outs:6,street:'flop',desc:'翻牌两高张(6 outs)全池'},
-  {pot:150,bet:50,outs:12,street:'flop',desc:'翻牌中对+花draw(12 outs)1/3池'},
-  {pot:90,bet:30,outs:2,street:'turn',desc:'转牌只有2张outs 1/3池'},
-  {pot:200,bet:150,outs:9,street:'turn',desc:'转牌花draw(9 outs)3/4池'},
-  {pot:60,bet:20,outs:4,street:'flop',desc:'翻牌卡顺(4 outs)1/3池'},
-  {pot:300,bet:100,outs:8,street:'flop',desc:'翻牌两头顺大底池1/3'},
-  {pot:100,bet:100,outs:15,street:'turn',desc:'转牌combo(15 outs)全池'},
-  {pot:50,bet:50,outs:6,street:'turn',desc:'转牌overcard(6 outs)全池'},
-  {pot:180,bet:60,outs:10,street:'flop',desc:'翻牌对子+顺draw(10)1/3池'},
-  {pot:120,bet:120,outs:12,street:'flop',desc:'翻牌combo(12 outs)全池'},
-  {pot:400,bet:200,outs:9,street:'flop',desc:'翻牌花draw深筹码半池'},
-  {pot:70,bet:70,outs:4,street:'flop',desc:'翻牌卡顺(4)全池'},
-  {pot:150,bet:75,outs:14,street:'flop',desc:'翻牌花+顺(14 outs)半池'},
-  {pot:200,bet:200,outs:8,street:'turn',desc:'转牌两头顺超额全池'},
-  {pot:100,bet:33,outs:5,street:'turn',desc:'转牌5 outs 1/3池'},
-  {pot:250,bet:125,outs:11,street:'flop',desc:'翻牌中对+花(11 outs)半池'}
+
+// 随机生成赔率训练题的参数表
+const drawTypes:{name:string;outs:number}[] = [
+  {name:'同花听牌',outs:9},{name:'两头顺子',outs:8},{name:'卡顺听牌',outs:4},
+  {name:'两高张',outs:6},{name:'同花+顺',outs:15},{name:'一对变三条',outs:2},
+  {name:'中对+花draw',outs:12},{name:'顶对+顺draw',outs:10},{name:'对子+卡顺',outs:6},
+  {name:'底对+花draw',outs:11},{name:'三条变葫芦',outs:7},{name:'双卡顺',outs:8},
+  {name:'同花+两高',outs:12},{name:'顶对+花+顺',outs:14},{name:'纯超张',outs:3},
+  {name:'后门花+顺',outs:5},{name:'两头顺+1over',outs:11},{name:'同花+卡顺',outs:12}
 ]
-function shuffle<T>(a:T[]):T[]{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]};return b}
-const quizzes=ref(shuffle(quizData)),quizIdx=ref(0),quizAnswered=ref(false),quizIsCorrect=ref(false),quizCorrect=ref(0),quizTotal=ref(0)
-const currentQuiz=computed(()=>quizzes.value[quizIdx.value]||null)
+const betSizes = [0.33, 0.5, 0.66, 0.75, 1.0, 1.25, 1.5]
+const potBases = [40, 60, 80, 100, 120, 150, 180, 200, 250, 300, 400]
+
+function generateQuiz(): OQ {
+  const draw = drawTypes[Math.floor(Math.random() * drawTypes.length)]
+  const street: 'flop'|'turn' = Math.random() > 0.5 ? 'flop' : 'turn'
+  const potBase = potBases[Math.floor(Math.random() * potBases.length)]
+  const betRatio = betSizes[Math.floor(Math.random() * betSizes.length)]
+  const bet = Math.round(potBase * betRatio)
+  const sizeLabel = betRatio <= 0.34 ? '1/3池' : betRatio <= 0.51 ? '半池' : betRatio <= 0.67 ? '2/3池' : betRatio <= 0.76 ? '3/4池' : betRatio <= 1.01 ? '全池' : '超池'
+  return { pot: potBase, bet, outs: draw.outs, street, desc: `${street==='flop'?'翻牌':'转牌'}${draw.name}(${draw.outs} outs)${sizeLabel}` }
+}
+
+const quizAnswered=ref(false),quizIsCorrect=ref(false),quizCorrect=ref(0),quizTotal=ref(0)
+const currentQuiz=ref<OQ>(generateQuiz())
 const quizPotOdds=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.round((q.bet/(q.pot+q.bet+q.bet))*100)})
 const quizEquity=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.min(q.outs*(q.street==='flop'?4:2),100)})
 function answerQuiz(call:boolean){const c=quizEquity.value>=quizPotOdds.value;quizIsCorrect.value=call===c;quizTotal.value++;if(quizIsCorrect.value)quizCorrect.value++;progressStore.recordAnswer('odds',quizIsCorrect.value);quizAnswered.value=true}
-function nextQuiz(){quizIdx.value++;quizAnswered.value=false}
-function resetQuiz(){quizzes.value=shuffle(quizData);quizIdx.value=0;quizCorrect.value=0;quizTotal.value=0;quizAnswered.value=false}
+function nextQuiz(){currentQuiz.value=generateQuiz();quizAnswered.value=false}
+function resetQuiz(){quizCorrect.value=0;quizTotal.value=0;currentQuiz.value=generateQuiz();quizAnswered.value=false}
 </script>
 
 <style scoped>
