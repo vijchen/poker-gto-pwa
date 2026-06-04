@@ -32,13 +32,21 @@
 
     <HandMatrix :get-action="getAction" @select="handleSelect" />
 
+    <!-- 颜色图例 -->
+    <div class="legend">
+      <span class="legend-item"><span class="dot dot-raise"></span>Raise/4Bet</span>
+      <span class="legend-item"><span class="dot dot-call"></span>Call</span>
+      <span class="legend-item"><span class="dot dot-mixed"></span>Mixed</span>
+      <span class="legend-item"><span class="dot dot-fold"></span>Fold</span>
+    </div>
+
     <StrategyPopup :visible="popupVisible" :hand-name="selectedHand" :position="currentPosition"
       :scenario="currentScenario" :action="selectedAction" @close="popupVisible = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Scenario, HandAction, Position } from '@/types/poker'
 import { usePosition } from '@/composables/usePosition'
 import { useRange } from '@/composables/useRange'
@@ -77,6 +85,15 @@ const { getAction, openerPosition, setOpenerPosition, getValidOpeners } = useRan
 )
 const validOpeners = computed(() => getValidOpeners(currentPosition.value))
 
+watch([() => currentPosition.value, () => currentScenario.value], () => {
+  if (currentScenario.value === 'vsOpen') {
+    const valid = getValidOpeners(currentPosition.value)
+    if (valid.length > 0 && !valid.includes(openerPosition.value as any)) {
+      setOpenerPosition(valid[0])
+    }
+  }
+}, { immediate: true })
+
 const popupVisible = ref(false)
 const selectedHand = ref('')
 const selectedAction = ref<HandAction>({ action: 'fold' })
@@ -111,6 +128,14 @@ function handleSelect(handName: string, row: number, col: number) {
   background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .opener-btn.active { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.4); color: #fb923c; }
+
+.legend { display: flex; gap: 12px; justify-content: center; padding: 8px 16px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-secondary); }
+.dot { width: 10px; height: 10px; border-radius: 2px; }
+.dot-raise { background: linear-gradient(135deg, #059669, #34d399); }
+.dot-call { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+.dot-mixed { background: linear-gradient(135deg, #059669, #d97706); }
+.dot-fold { background: rgba(255,255,255,0.08); }
 
 .table-visual { padding: 0 16px; margin-bottom: 8px; }
 .table-felt {
