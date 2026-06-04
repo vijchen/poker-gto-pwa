@@ -23,6 +23,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useProgressStore } from '@/stores/progressStore'
+const progressStore = useProgressStore()
 
 interface QuizItem { question: string; options: string[]; correctIdx: number; explain: string }
 
@@ -69,7 +71,7 @@ function optClass(idx: number): string {
   if (idx === selectedIdx.value && idx !== currentQ.value!.correctIdx) return 'wrong'
   return 'dim'
 }
-function answer(idx: number) { selectedIdx.value = idx; answered.value = true; total.value++; if (idx === currentQ.value!.correctIdx) correct.value++ }
+function answer(idx: number) { selectedIdx.value = idx; answered.value = true; total.value++; if (idx === currentQ.value!.correctIdx) correct.value++; progressStore.recordAnswer('quiz', idx === currentQ.value!.correctIdx) }
 function next() { currentIdx.value++; answered.value = false; selectedIdx.value = -1 }
 function reset() { questions.value = shuffle(quizData); currentIdx.value = 0; correct.value = 0; total.value = 0; answered.value = false }
 </script>

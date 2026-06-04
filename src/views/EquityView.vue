@@ -113,11 +113,17 @@ function handleCalc() {
     if (!posData) return
     const playable = Object.entries(posData).filter(([_, v]: any) => v.action === 'raise' || v.action === 'mixed').map(([k]) => k)
     if (playable.length === 0) return
-    const handName = playable[Math.floor(Math.random() * playable.length)]
     const exclude = [...heroCards.value, ...boardCards.value]
+    const handName = playable[Math.floor(Math.random() * playable.length)]
     const vCards = handNameToCards(handName, exclude)
-    if (!vCards) return
-    calculate(heroCards.value, vCards, boardCards.value)
+    if (!vCards) {
+      const h2 = playable[Math.floor(Math.random() * playable.length)]
+      const v2 = handNameToCards(h2, exclude)
+      if (!v2) return
+      calculate(heroCards.value, v2, boardCards.value, 50000)
+      return
+    }
+    calculate(heroCards.value, vCards, boardCards.value, 50000)
   }
 }
 
