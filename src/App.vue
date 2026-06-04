@@ -7,6 +7,10 @@
     </RouterView>
     <nav class="tab-bar">
       <RouterLink to="/" class="tab-item" active-class="active" exact>
+        <span class="tab-icon">🌱</span>
+        <span class="tab-label">入门</span>
+      </RouterLink>
+      <RouterLink to="/strategy" class="tab-item" active-class="active">
         <span class="tab-icon">🎯</span>
         <span class="tab-label">策略</span>
       </RouterLink>
