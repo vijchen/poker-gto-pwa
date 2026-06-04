@@ -90,7 +90,7 @@ function handleSelect(handName: string, row: number, col: number) {
 
 <style scoped>
 .home { min-height: 100vh; display: flex; flex-direction: column; }
-.app-header { padding: 16px 20px 8px; }
+.app-header { padding: calc(env(safe-area-inset-top) + 12px) 20px 8px; }
 .app-logo { font-family: var(--font-display); font-size: 22px; font-weight: 900; letter-spacing: -0.02em; }
 .logo-accent { color: var(--accent-green); margin-left: 2px; }
 .scenario-tabs { display: flex; gap: 8px; padding: 8px 16px; }
