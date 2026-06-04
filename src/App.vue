@@ -7,48 +7,24 @@
     </RouterView>
     <nav class="tab-bar">
       <RouterLink to="/" class="tab-item" active-class="active" exact>
-        <span class="tab-icon">🌱</span>
-        <span class="tab-label">入门</span>
-      </RouterLink>
-      <RouterLink to="/stats" class="tab-item" active-class="active">
-        <span class="tab-icon">📈</span>
-        <span class="tab-label">进度</span>
-      </RouterLink>
-      <RouterLink to="/strategy" class="tab-item" active-class="active">
         <span class="tab-icon">🎯</span>
         <span class="tab-label">策略</span>
       </RouterLink>
       <RouterLink to="/train" class="tab-item" active-class="active">
         <span class="tab-icon">🏋️</span>
-        <span class="tab-label">翻前</span>
+        <span class="tab-label">训练</span>
       </RouterLink>
-      <RouterLink to="/postflop" class="tab-item" active-class="active">
-        <span class="tab-icon">🏆</span>
-        <span class="tab-label">翻后</span>
+      <RouterLink to="/tools" class="tab-item" active-class="active">
+        <span class="tab-icon">🧰</span>
+        <span class="tab-label">工具</span>
       </RouterLink>
-      <RouterLink to="/equity" class="tab-item" active-class="active">
-        <span class="tab-icon">📊</span>
-        <span class="tab-label">胜率</span>
+      <RouterLink to="/learn" class="tab-item" active-class="active">
+        <span class="tab-icon">📚</span>
+        <span class="tab-label">学习</span>
       </RouterLink>
-      <RouterLink to="/odds" class="tab-item" active-class="active">
-        <span class="tab-icon">🧮</span>
-        <span class="tab-label">赔率</span>
-      </RouterLink>
-      <RouterLink to="/glossary" class="tab-item" active-class="active">
-        <span class="tab-icon">📖</span>
-        <span class="tab-label">词典</span>
-      </RouterLink>
-      <RouterLink to="/quiz" class="tab-item" active-class="active">
-        <span class="tab-icon">🧠</span>
-        <span class="tab-label">测验</span>
-      </RouterLink>
-      <RouterLink to="/handlog" class="tab-item" active-class="active">
-        <span class="tab-icon">📝</span>
-        <span class="tab-label">记牌</span>
-      </RouterLink>
-      <RouterLink to="/ranges" class="tab-item" active-class="active">
-        <span class="tab-icon">✏️</span>
-        <span class="tab-label">范围</span>
+      <RouterLink to="/me" class="tab-item" active-class="active">
+        <span class="tab-icon">👤</span>
+        <span class="tab-label">我的</span>
       </RouterLink>
     </nav>
   </div>

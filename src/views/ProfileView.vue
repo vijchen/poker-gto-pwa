@@ -1,0 +1,28 @@
+<template>
+  <div class="hub-page">
+    <div class="hub-tabs">
+      <button v-for="t in tabs" :key="t.key" :class="['hub-tab', { active: activeTab === t.key }]" @click="activeTab = t.key">{{ t.icon }} {{ t.label }}</button>
+    </div>
+    <StatsView v-if="activeTab === 'stats'" />
+    <HandLogView v-if="activeTab === 'handlog'" />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import StatsView from './StatsView.vue'
+import HandLogView from './HandLogView.vue'
+
+const activeTab = ref('stats')
+const tabs = [
+  { key: 'stats', icon: '📈', label: '进度' },
+  { key: 'handlog', icon: '📝', label: '记牌' }
+]
+</script>
+
+<style scoped>
+.hub-page { padding-top: 8px; }
+.hub-tabs { display: flex; gap: 6px; padding: 0 16px 8px; }
+.hub-tab { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; }
+.hub-tab.active { background: var(--accent-green-dim); border-color: var(--border-active); color: var(--accent-green); }
+</style>
