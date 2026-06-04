@@ -74,8 +74,10 @@ import type { Position, HandAction } from '@/types/poker'
 import { POSITIONS, RANKS } from '@/types/poker'
 import openData from '@/data/ranges/open.json'
 import { advancedScenarios } from '@/data/preflop-advanced'
+import { useProgressStore } from '@/stores/progressStore'
 
 const trainMode = ref<'basic' | 'advanced'>('basic')
+const progressStore = useProgressStore()
 
 // State
 const currentHand = ref<[string, string]>(['As', 'Kh'])
@@ -181,7 +183,7 @@ function decide(userAction: 'raise' | 'fold') {
   totalPlayed.value++
   if (isCorrect.value) { totalCorrect.value++; streak.value++ }
   else { streak.value = 0 }
-
+  progressStore.recordAnswer('preflop', isCorrect.value)
   showResult.value = true
 }
 
@@ -192,7 +194,7 @@ const advIdx = ref(0)
 const advAnswered = ref(false)
 const advCorrect = ref(false)
 const currentAdv = computed(() => advancedScenarios[advIdx.value] || null)
-function answerAdv(idx: number) { advCorrect.value = idx === currentAdv.value!.correctIdx; advAnswered.value = true }
+function answerAdv(idx: number) { advCorrect.value = idx === currentAdv.value!.correctIdx; advAnswered.value = true; progressStore.recordAnswer('preflop', advCorrect.value) }
 function nextAdv() { advIdx.value++; advAnswered.value = false }
 function resetAdv() { advIdx.value = 0; advAnswered.value = false }
 </script>

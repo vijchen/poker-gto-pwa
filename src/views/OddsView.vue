@@ -39,6 +39,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useProgressStore } from '@/stores/progressStore'
+const progressStore = useProgressStore()
 const mode = ref<'calc'|'quiz'>('calc')
 const pot = ref(6), bet = ref(2), outs = ref(9)
 const potOdds = computed(()=>{const t=pot.value+bet.value;return t===0?0:Math.round((bet.value/t)*100)})
@@ -77,7 +79,7 @@ const quizzes=ref(shuffle(quizData)),quizIdx=ref(0),quizAnswered=ref(false),quiz
 const currentQuiz=computed(()=>quizzes.value[quizIdx.value]||null)
 const quizPotOdds=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.round((q.bet/(q.pot+q.bet+q.bet))*100)})
 const quizEquity=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.min(q.outs*(q.street==='flop'?4:2),100)})
-function answerQuiz(call:boolean){const c=quizEquity.value>=quizPotOdds.value;quizIsCorrect.value=call===c;quizTotal.value++;if(quizIsCorrect.value)quizCorrect.value++;quizAnswered.value=true}
+function answerQuiz(call:boolean){const c=quizEquity.value>=quizPotOdds.value;quizIsCorrect.value=call===c;quizTotal.value++;if(quizIsCorrect.value)quizCorrect.value++;progressStore.recordAnswer('odds',quizIsCorrect.value);quizAnswered.value=true}
 function nextQuiz(){quizIdx.value++;quizAnswered.value=false}
 function resetQuiz(){quizzes.value=shuffle(quizData);quizIdx.value=0;quizCorrect.value=0;quizTotal.value=0;quizAnswered.value=false}
 </script>

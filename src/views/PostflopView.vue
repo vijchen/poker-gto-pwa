@@ -39,6 +39,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { scenarios } from '@/data/postflop-scenarios'
+import { useProgressStore } from '@/stores/progressStore'
+
+const progressStore = useProgressStore()
 
 const activeDifficulty = ref('全部')
 const currentIndex = ref(0)
@@ -70,6 +73,7 @@ function answer(action: string) {
   isCorrect.value = action === currentScenario.value.correctAction
   totalAnswered.value++
   if (isCorrect.value) totalCorrect.value++
+  progressStore.recordAnswer('postflop', isCorrect.value)
   answered.value = true
 }
 function nextScenario() { currentIndex.value++; answered.value = false }
