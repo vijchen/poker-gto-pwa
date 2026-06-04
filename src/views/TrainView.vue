@@ -2,11 +2,18 @@
   <div class="train-page">
     <h2 class="page-title">翻前训练</h2>
 
+    <div class="train-mode">
+      <button :class="['mode-btn', { active: trainMode === 'basic' }]" @click="trainMode = 'basic'; nextHand()">开池训练</button>
+      <button :class="['mode-btn', { active: trainMode === 'advanced' }]" @click="trainMode = 'advanced'; advIdx = 0; advAnswered = false">进阶场景</button>
+    </div>
+
     <div class="stats-bar">
       <span class="stat">正确率 <strong>{{ accuracy }}%</strong></span>
       <span class="stat">连胜 <strong>{{ streak }}</strong></span>
       <span class="stat">已练 <strong>{{ totalPlayed }}</strong></span>
     </div>
+
+    <template v-if="trainMode === 'basic'">
 
     <div class="hand-display">
       <div class="card-visual" :class="suitClass(currentHand[0])">{{ formatCard(currentHand[0]) }}</div>
@@ -39,6 +46,25 @@
       </div>
       <button class="btn-next" @click="nextHand">下一手 →</button>
     </div>
+    </template>
+
+    <!-- 进阶场景 -->
+    <template v-if="trainMode === 'advanced'">
+      <div v-if="currentAdv" class="adv-card">
+        <div class="adv-header"><span class="adv-hand">{{ currentAdv.hand }}</span><span class="adv-pos">{{ currentAdv.position }}</span><span :class="['adv-diff', currentAdv.difficulty]">{{ currentAdv.difficulty }}</span></div>
+        <p class="adv-situation">{{ currentAdv.situation }}</p>
+        <p class="adv-question">{{ currentAdv.question }}</p>
+        <div v-if="!advAnswered" class="adv-options">
+          <button v-for="(opt, idx) in currentAdv.options" :key="idx" class="adv-opt" @click="answerAdv(idx)">{{ opt }}</button>
+        </div>
+        <div v-else class="adv-result">
+          <div :class="['result-badge', advCorrect ? 'correct' : 'wrong']">{{ advCorrect ? '✓ 正确' : '✗ 错误' }}</div>
+          <div class="adv-explain">{{ currentAdv.explain }}</div>
+          <button class="btn-next" @click="nextAdv">下一题 →</button>
+        </div>
+      </div>
+      <div v-else class="complete">🎉 全部完成！<button class="btn-next" @click="resetAdv">重来</button></div>
+    </template>
   </div>
 </template>
 
@@ -47,6 +73,9 @@ import { ref, computed, onMounted } from 'vue'
 import type { Position, HandAction } from '@/types/poker'
 import { POSITIONS, RANKS } from '@/types/poker'
 import openData from '@/data/ranges/open.json'
+import { advancedScenarios } from '@/data/preflop-advanced'
+
+const trainMode = ref<'basic' | 'advanced'>('basic')
 
 // State
 const currentHand = ref<[string, string]>(['As', 'Kh'])
@@ -157,6 +186,15 @@ function decide(userAction: 'raise' | 'fold') {
 }
 
 onMounted(() => nextHand())
+
+// === Advanced mode ===
+const advIdx = ref(0)
+const advAnswered = ref(false)
+const advCorrect = ref(false)
+const currentAdv = computed(() => advancedScenarios[advIdx.value] || null)
+function answerAdv(idx: number) { advCorrect.value = idx === currentAdv.value!.correctIdx; advAnswered.value = true }
+function nextAdv() { advIdx.value++; advAnswered.value = false }
+function resetAdv() { advIdx.value = 0; advAnswered.value = false }
 </script>
 
 <style scoped>
@@ -204,4 +242,22 @@ onMounted(() => nextHand())
 }
 .ev-loss strong { color: #f87171; }
 .ev-icon { font-size: 16px; }
+.train-mode { display: flex; gap: 6px; margin-bottom: 14px; width: 100%; }
+.mode-btn { flex: 1; padding: 8px; border-radius: 10px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; }
+.mode-btn.active { background: var(--accent-green-dim); border-color: var(--border-active); color: var(--accent-green); }
+.adv-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px; width: 100%; }
+.adv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.adv-hand { font-family: var(--font-display); font-size: 20px; font-weight: 900; }
+.adv-pos { font-size: 10px; padding: 2px 8px; background: var(--accent-green-dim); color: var(--accent-green); border-radius: 8px; font-weight: 700; }
+.adv-diff { font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+.adv-diff.入门 { background: rgba(34,197,94,0.15); color: #4ade80; }
+.adv-diff.进阶 { background: rgba(234,179,8,0.15); color: #eab308; }
+.adv-diff.困难 { background: rgba(239,68,68,0.15); color: #ef4444; }
+.adv-situation { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.adv-question { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.adv-options { display: flex; flex-direction: column; gap: 8px; }
+.adv-opt { padding: 12px; border: 1px solid var(--border-subtle); border-radius: 10px; background: transparent; color: var(--text-primary); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+.adv-result { display: flex; flex-direction: column; gap: 10px; }
+.adv-explain { font-size: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; }
+.complete { text-align: center; padding: 30px 0; color: var(--text-secondary); width: 100%; }
 </style>
