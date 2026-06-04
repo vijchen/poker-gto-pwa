@@ -6,6 +6,19 @@
 
     <PositionBar />
 
+    <!-- 牌桌可视化 -->
+    <div class="table-visual">
+      <div class="table-felt">
+        <div v-for="pos in tablePositions" :key="pos.name"
+          :class="['table-pos', { active: currentPosition === pos.name }]"
+          :style="pos.style"
+          @click="setPositionDirect(pos.name)">
+          {{ pos.name }}
+        </div>
+        <div class="table-center">{{ openPct }}%</div>
+      </div>
+    </div>
+
     <div class="scenario-tabs">
       <button v-for="s in scenarios" :key="s.key"
         :class="['tab-btn', { active: currentScenario === s.key }]" @click="currentScenario = s.key">{{ s.label }}</button>
@@ -26,15 +39,33 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { Scenario, HandAction } from '@/types/poker'
+import type { Scenario, HandAction, Position } from '@/types/poker'
 import { usePosition } from '@/composables/usePosition'
 import { useRange } from '@/composables/useRange'
 import PositionBar from '@/components/PositionBar.vue'
 import HandMatrix from '@/components/HandMatrix.vue'
 import StrategyPopup from '@/components/StrategyPopup.vue'
 
-const { currentPosition } = usePosition()
+const { currentPosition, setPosition } = usePosition()
 const currentScenario = ref<Scenario>('open')
+
+const tablePositions = [
+  { name: 'UTG' as Position, style: 'top: 15%; left: 20%' },
+  { name: 'UTG1' as Position, style: 'top: 15%; left: 42%' },
+  { name: 'MP' as Position, style: 'top: 15%; left: 64%' },
+  { name: 'HJ' as Position, style: 'top: 15%; right: 12%' },
+  { name: 'CO' as Position, style: 'bottom: 15%; right: 12%' },
+  { name: 'BTN' as Position, style: 'bottom: 15%; left: 64%' },
+  { name: 'SB' as Position, style: 'bottom: 15%; left: 42%' },
+  { name: 'BB' as Position, style: 'bottom: 15%; left: 20%' }
+]
+
+const openPctMap: Record<Position, number> = {
+  UTG: 12, UTG1: 14, MP: 17, HJ: 21, CO: 27, BTN: 42, SB: 35, BB: 0
+}
+const openPct = computed(() => openPctMap[currentPosition.value] || 0)
+
+function setPositionDirect(pos: Position) { setPosition(pos) }
 const scenarios: { key: Scenario; label: string }[] = [
   { key: 'open', label: 'Open' },
   { key: 'vs3bet', label: 'vs 3Bet' },
@@ -80,4 +111,25 @@ function handleSelect(handName: string, row: number, col: number) {
   background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .opener-btn.active { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.4); color: #fb923c; }
+
+.table-visual { padding: 0 16px; margin-bottom: 8px; }
+.table-felt {
+  position: relative; width: 100%; aspect-ratio: 2.2; border-radius: 50%/46%;
+  background: radial-gradient(ellipse at center, #0d4a2c 0%, #072a18 100%);
+  border: 3px solid #8B6914; box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
+}
+.table-pos {
+  position: absolute; transform: translate(-50%, -50%);
+  padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: 800;
+  background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer; transition: all 0.25s; z-index: 2;
+}
+.table-pos.active {
+  background: var(--accent-green); color: #000; border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(52,211,153,0.4); transform: translate(-50%, -50%) scale(1.15);
+}
+.table-center {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--accent-gold);
+}
 </style>

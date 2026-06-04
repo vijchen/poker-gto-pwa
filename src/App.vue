@@ -38,6 +38,10 @@
         <span class="tab-icon">🧠</span>
         <span class="tab-label">测验</span>
       </RouterLink>
+      <RouterLink to="/handlog" class="tab-item" active-class="active">
+        <span class="tab-icon">📝</span>
+        <span class="tab-label">记牌</span>
+      </RouterLink>
       <RouterLink to="/ranges" class="tab-item" active-class="active">
         <span class="tab-icon">✏️</span>
         <span class="tab-label">范围</span>

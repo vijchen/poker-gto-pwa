@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/odds', name: 'odds', component: () => import('@/views/OddsView.vue') },
     { path: '/glossary', name: 'glossary', component: () => import('@/views/GlossaryView.vue') },
     { path: '/quiz', name: 'quiz', component: () => import('@/views/QuizView.vue') },
+    { path: '/handlog', name: 'handlog', component: () => import('@/views/HandLogView.vue') },
     { path: '/ranges', name: 'ranges', component: () => import('@/views/RangesView.vue') }
   ]
 })
