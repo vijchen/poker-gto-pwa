@@ -4,6 +4,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', name: 'guide', component: () => import('@/views/GuideView.vue') },
+    { path: '/stats', name: 'stats', component: () => import('@/views/StatsView.vue') },
     { path: '/strategy', name: 'strategy', component: () => import('@/views/HomeView.vue') },
     { path: '/train', name: 'train', component: () => import('@/views/TrainView.vue') },
     { path: '/postflop', name: 'postflop', component: () => import('@/views/PostflopView.vue') },

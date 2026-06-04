@@ -10,6 +10,10 @@
         <span class="tab-icon">🌱</span>
         <span class="tab-label">入门</span>
       </RouterLink>
+      <RouterLink to="/stats" class="tab-item" active-class="active">
+        <span class="tab-icon">📈</span>
+        <span class="tab-label">进度</span>
+      </RouterLink>
       <RouterLink to="/strategy" class="tab-item" active-class="active">
         <span class="tab-icon">🎯</span>
         <span class="tab-label">策略</span>
