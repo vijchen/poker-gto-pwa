@@ -34,6 +34,10 @@
         <span class="tab-icon">📖</span>
         <span class="tab-label">词典</span>
       </RouterLink>
+      <RouterLink to="/quiz" class="tab-item" active-class="active">
+        <span class="tab-icon">🧠</span>
+        <span class="tab-label">测验</span>
+      </RouterLink>
       <RouterLink to="/ranges" class="tab-item" active-class="active">
         <span class="tab-icon">✏️</span>
         <span class="tab-label">范围</span>
