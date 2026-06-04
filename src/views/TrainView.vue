@@ -33,6 +33,10 @@
           {{ gtoActionLabel }}
         </strong>
       </div>
+      <div v-if="!isCorrect" class="ev-loss">
+        <span class="ev-icon">⚠️</span>
+        <span>EV 损失估算: <strong>-{{ evLoss }} BB/手</strong></span>
+      </div>
       <button class="btn-next" @click="nextHand">下一手 →</button>
     </div>
   </div>
@@ -118,6 +122,13 @@ const gtoActionLabel = computed(() => {
   }
 })
 
+const evLoss = computed(() => {
+  if (isCorrect.value) return '0'
+  if (gtoAction.value === 'raise') return '1.5'
+  if (gtoAction.value === 'fold') return '2.5'
+  return '0.5'
+})
+
 let currentHandName = ''
 
 function nextHand() {
@@ -186,4 +197,11 @@ onMounted(() => nextHand())
   margin-top: 8px; padding: 14px 40px; border: none; border-radius: 12px;
   background: rgba(255,255,255,0.1); color: #eee; font-size: 16px; font-weight: 600; cursor: pointer;
 }
+.ev-loss {
+  display: flex; align-items: center; gap: 6px; padding: 10px 14px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px; font-size: 13px; color: rgba(255,255,255,0.7);
+}
+.ev-loss strong { color: #f87171; }
+.ev-icon { font-size: 16px; }
 </style>
