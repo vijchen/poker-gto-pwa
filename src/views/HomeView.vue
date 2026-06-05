@@ -40,6 +40,8 @@
       <span class="legend-item"><span class="dot dot-fold"></span>Fold</span>
     </div>
 
+    <p class="data-source">数据基于 GTO 理论标准校准，参考 PioSolver / Upswing / GTO Wizard 公开百分比。简化版纯策略，非 solver 精确 mixed 输出。</p>
+
     <StrategyPopup :visible="popupVisible" :hand-name="selectedHand" :position="currentPosition"
       :scenario="currentScenario" :action="selectedAction" @close="popupVisible = false" />
   </div>
@@ -69,7 +71,7 @@ const tablePositions = [
 ]
 
 const openPctMap: Record<Position, number> = {
-  UTG: 12, UTG1: 14, MP: 17, HJ: 21, CO: 27, BTN: 42, SB: 35, BB: 0
+  UTG: 10, UTG1: 14, MP: 18, HJ: 22, CO: 31, BTN: 46, SB: 39, BB: 0
 }
 const openPct = computed(() => openPctMap[currentPosition.value] || 0)
 
@@ -156,5 +158,9 @@ function handleSelect(handName: string, row: number, col: number) {
 .table-center {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--accent-gold);
+}
+.data-source {
+  padding: 8px 16px; margin: 4px 0 60px; font-size: 9px; color: rgba(255,255,255,0.3);
+  text-align: center; line-height: 1.5;
 }
 </style>
