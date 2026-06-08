@@ -320,10 +320,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -891,10 +897,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -1474,13 +1486,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -1510,7 +1537,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -2074,13 +2106,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -2110,7 +2157,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -2690,13 +2742,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -2726,7 +2793,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -3323,13 +3395,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -3359,7 +3446,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -3968,13 +4060,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -4004,7 +4111,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -4534,10 +4646,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -5116,10 +5234,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -5715,13 +5839,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -5751,7 +5890,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -6326,13 +6470,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -6362,7 +6521,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -6953,13 +7117,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -6989,7 +7168,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -7597,13 +7781,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -7633,7 +7832,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -8169,10 +8373,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -8757,10 +8967,16 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
       "action": "fold"
@@ -9362,13 +9578,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -9398,7 +9629,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -9984,13 +10220,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -10020,7 +10271,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -10617,13 +10873,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "ATo": {
       "action": "fold"
@@ -10653,7 +10924,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "KJo": {
       "action": "fold"
@@ -11200,13 +11476,24 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
       "action": "fold"
@@ -11236,7 +11523,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
       "action": "fold"
@@ -11799,13 +12091,24 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.2,
+        "call": 0.3,
+        "fold": 0.5
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
       "action": "fold"
@@ -11835,7 +12138,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
       "action": "fold"
@@ -12415,13 +12723,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
       "action": "fold"
@@ -12451,7 +12774,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
       "action": "fold"
@@ -13048,13 +13376,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
       "action": "fold"
@@ -13084,7 +13427,12 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
       "action": "fold"
@@ -13642,16 +13990,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -13678,10 +14038,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -13711,7 +14081,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -13741,7 +14116,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
@@ -14247,16 +14627,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -14283,10 +14675,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -14316,7 +14718,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -14346,7 +14753,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
@@ -14869,16 +15281,32 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.5,
+        "call": 0.5,
+        "fold": 0
+      }
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -14905,10 +15333,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -14938,7 +15376,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -14968,7 +15411,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
@@ -15474,16 +15922,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -15510,10 +15970,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -15543,7 +16013,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -15573,7 +16048,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
@@ -16096,16 +16576,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -16132,10 +16624,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -16165,7 +16667,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -16195,7 +16702,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
@@ -16707,16 +17219,28 @@
       "action": "fold"
     },
     "AKo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AQo": {
-      "action": "fold"
+      "action": "raise",
+      "raiseSize": "3x"
     },
     "AJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "ATo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "A9o": {
       "action": "fold"
@@ -16743,10 +17267,20 @@
       "action": "fold"
     },
     "KQo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0.3,
+        "call": 0.4,
+        "fold": 0.3
+      }
     },
     "KJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.5,
+        "fold": 0.5
+      }
     },
     "KTo": {
       "action": "fold"
@@ -16776,7 +17310,12 @@
       "action": "fold"
     },
     "QJo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "QTo": {
       "action": "fold"
@@ -16806,7 +17345,12 @@
       "action": "fold"
     },
     "JTo": {
-      "action": "fold"
+      "action": "mixed",
+      "frequency": {
+        "raise": 0,
+        "call": 0.4,
+        "fold": 0.6
+      }
     },
     "J9o": {
       "action": "fold"
