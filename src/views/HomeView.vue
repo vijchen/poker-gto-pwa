@@ -40,7 +40,7 @@
       <span class="legend-item"><span class="dot dot-fold"></span>Fold</span>
     </div>
 
-    <p class="data-source">数据基于 GTO 理论标准校准，参考 PioSolver / Upswing / GTO Wizard 公开百分比。简化版纯策略，非 solver 精确 mixed 输出。</p>
+    <p class="data-source">数据适用于线下朋友局 / 低抽水休闲局（8人桌 100BB），范围比严格 GTO 略宽以适应被动对手环境。</p>
 
     <StrategyPopup :visible="popupVisible" :hand-name="selectedHand" :position="currentPosition"
       :scenario="currentScenario" :action="selectedAction" @close="popupVisible = false" />
