@@ -18,7 +18,7 @@ export function useEquity() {
     isCalculating.value = true
     result.value = null
 
-    worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url), { type: 'module' })
+    worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url))
 
     worker.onmessage = (e: MessageEvent<EquityResult>) => {
       result.value = e.data
