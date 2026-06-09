@@ -83,11 +83,17 @@ function getStraightHigh(sortedRanks: number[]): number {
 }
 
 function combinations<T>(arr: T[], k: number): T[][] {
-  if (k === 0) return [[]]
-  if (arr.length === 0) return []
   const result: T[][] = []
-  const [first, ...rest] = arr
-  for (const combo of combinations(rest, k - 1)) result.push([first, ...combo])
-  for (const combo of combinations(rest, k)) result.push(combo)
+  const n = arr.length
+  const indices = Array.from({ length: k }, (_, i) => i)
+
+  while (true) {
+    result.push(indices.map(i => arr[i]))
+    let i = k - 1
+    while (i >= 0 && indices[i] === n - k + i) i--
+    if (i < 0) break
+    indices[i]++
+    for (let j = i + 1; j < k; j++) indices[j] = indices[j - 1] + 1
+  }
   return result
 }

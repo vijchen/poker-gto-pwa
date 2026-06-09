@@ -120,10 +120,10 @@ function handleCalc() {
       const h2 = playable[Math.floor(Math.random() * playable.length)]
       const v2 = handNameToCards(h2, exclude)
       if (!v2) return
-      calculate(heroCards.value, v2, boardCards.value, 50000)
+      calculate(heroCards.value, v2, boardCards.value)
       return
     }
-    calculate(heroCards.value, vCards, boardCards.value, 50000)
+    calculate(heroCards.value, vCards, boardCards.value)
   }
 }
 
