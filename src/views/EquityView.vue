@@ -42,6 +42,10 @@
       <div class="result-row"><span class="result-label">平局</span><span class="result-value tie">{{ result.tie }}%</span></div>
     </div>
 
+    <div v-if="error" class="error-card">
+      <p>⚠️ {{ error }}</p>
+    </div>
+
     <div v-if="mode === 'range'" class="range-info">
       <p>💡 从对手位置的 open 范围中随机抽取手牌模拟，结果为对抗该范围的近似胜率。</p>
     </div>
@@ -70,7 +74,7 @@ const rangePresets = [
   { key: 'SB', label: 'SB 35%' }
 ]
 
-const { isCalculating, result, calculate, reset } = useEquity()
+const { isCalculating, result, error, calculate, reset } = useEquity()
 
 const canCalc = computed(() => {
   if (heroCards.value.length !== 2) return false
@@ -156,4 +160,6 @@ function handleReset() {
 .result-value.tie { color: var(--accent-gold); }
 .range-info { margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; }
 .range-info p { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.error-card { margin-top: 12px; padding: 14px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; }
+.error-card p { font-size: 13px; color: #f87171; }
 </style>

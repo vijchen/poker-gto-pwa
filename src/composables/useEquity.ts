@@ -8,6 +8,7 @@ interface EquityResult {
 
 const isCalculating = ref(false)
 const result = ref<EquityResult | null>(null)
+const error = ref('')
 
 export function useEquity() {
   let worker: Worker | null = null
@@ -17,14 +18,22 @@ export function useEquity() {
 
     isCalculating.value = true
     result.value = null
+    error.value = ''
 
-    worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url))
+    try {
+      worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url))
+    } catch (e) {
+      isCalculating.value = false
+      error.value = 'Worker 加载失败'
+      return
+    }
 
     const timeout = setTimeout(() => {
       isCalculating.value = false
+      error.value = '计算超时，请重试'
       worker?.terminate()
       worker = null
-    }, 8000)
+    }, 10000)
 
     worker.onmessage = (e: MessageEvent<EquityResult>) => {
       clearTimeout(timeout)
@@ -34,9 +43,10 @@ export function useEquity() {
       worker = null
     }
 
-    worker.onerror = () => {
+    worker.onerror = (ev) => {
       clearTimeout(timeout)
       isCalculating.value = false
+      error.value = 'Worker 出错: ' + (ev.message || '未知错误')
       worker?.terminate()
       worker = null
     }
@@ -46,10 +56,11 @@ export function useEquity() {
 
   function reset() {
     result.value = null
+    error.value = ''
     isCalculating.value = false
     worker?.terminate()
     worker = null
   }
 
-  return { isCalculating, result, calculate, reset }
+  return { isCalculating, result, error, calculate, reset }
 }
