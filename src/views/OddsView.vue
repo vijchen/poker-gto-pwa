@@ -11,6 +11,7 @@
         <div class="input-group"><label>底池大小</label><div class="input-row"><button class="adj-btn" @click="adjustPot(-1)">-</button><span class="input-value">{{ pot }} BB</span><button class="adj-btn" @click="adjustPot(1)">+</button></div></div>
         <div class="input-group"><label>需要跟注</label><div class="input-row"><button class="adj-btn" @click="adjustBet(-0.5)">-</button><span class="input-value">{{ bet }} BB</span><button class="adj-btn" @click="adjustBet(0.5)">+</button></div></div>
         <div class="input-group"><label>补牌数 (Outs)</label><div class="input-row"><button class="adj-btn" @click="adjustOuts(-1)">-</button><span class="input-value">{{ outs }}</span><button class="adj-btn" @click="adjustOuts(1)">+</button></div></div>
+        <div class="input-group"><label>当前街道</label><div class="input-row"><button :class="['street-btn', { active: street === 'flop' }]" @click="street = 'flop'">翻牌(×4)</button><button :class="['street-btn', { active: street === 'turn' }]" @click="street = 'turn'">转牌(×2)</button></div></div>
       </div>
       <div class="results">
         <div class="result-card"><span class="result-label">底池赔率</span><span class="result-value">{{ potOdds }}%</span></div>
@@ -42,9 +43,9 @@ import { ref, computed } from 'vue'
 import { useProgressStore } from '@/stores/progressStore'
 const progressStore = useProgressStore()
 const mode = ref<'calc'|'quiz'>('calc')
-const pot = ref(6), bet = ref(2), outs = ref(9)
+const pot = ref(6), bet = ref(2), outs = ref(9), street = ref<'flop'|'turn'>('flop')
 const potOdds = computed(()=>{const t=pot.value+bet.value;return t===0?0:Math.round((bet.value/t)*100)})
-const equity = computed(()=>Math.min(outs.value*4,100))
+const equity = computed(()=>Math.min(outs.value*(street.value==='flop'?4:2),100))
 const canCall = computed(()=>equity.value>=potOdds.value)
 const outsRef=[{name:'同花听牌',outs:9},{name:'两头顺听',outs:8},{name:'卡顺听牌',outs:4},{name:'两高张',outs:6},{name:'同花+顺',outs:15},{name:'一对变三条',outs:2}]
 function adjustPot(d:number){pot.value=Math.max(0,pot.value+d)}
@@ -77,7 +78,7 @@ function generateQuiz(): OQ {
 
 const quizAnswered=ref(false),quizIsCorrect=ref(false),quizCorrect=ref(0),quizTotal=ref(0)
 const currentQuiz=ref<OQ>(generateQuiz())
-const quizPotOdds=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.round((q.bet/(q.pot+q.bet+q.bet))*100)})
+const quizPotOdds=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.round((q.bet/(q.pot+q.bet))*100)})
 const quizEquity=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.min(q.outs*(q.street==='flop'?4:2),100)})
 function answerQuiz(call:boolean){const c=quizEquity.value>=quizPotOdds.value;quizIsCorrect.value=call===c;quizTotal.value++;if(quizIsCorrect.value)quizCorrect.value++;progressStore.recordAnswer('odds',quizIsCorrect.value);quizAnswered.value=true}
 function nextQuiz(){currentQuiz.value=generateQuiz();quizAnswered.value=false}
@@ -89,6 +90,7 @@ function resetQuiz(){quizCorrect.value=0;quizTotal.value=0;currentQuiz.value=gen
 .mode-tabs{display:flex;gap:6px;margin-bottom:14px}.mode-btn{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border-subtle);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:700;cursor:pointer}.mode-btn.active{background:var(--accent-green-dim);border-color:var(--border-active);color:var(--accent-green)}
 .input-section{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}.input-group label{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;display:block}.input-row{display:flex;align-items:center;gap:12px}
 .adj-btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#eee;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}.input-value{font-size:20px;font-weight:700;min-width:80px;text-align:center}
+.street-btn{flex:1;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:8px;background:transparent;color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer}.street-btn.active{background:var(--accent-green-dim);border-color:var(--border-active);color:var(--accent-green)}
 .results{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}.result-card{background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px}.result-label{font-size:12px;color:rgba(255,255,255,0.5)}.result-value{font-size:24px;font-weight:800;color:#4ade80}
 .decision-card{padding:16px;border-radius:12px;display:flex;align-items:center;gap:10px}.decision-card.positive{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3)}.decision-card.negative{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3)}.decision-icon{font-size:20px}.decision-text{font-size:15px;font-weight:600}.positive .decision-text{color:#22c55e}.negative .decision-text{color:#ef4444}
 .outs-reference h3{font-size:14px;font-weight:600;margin-bottom:8px}.outs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.outs-item{background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:2px}.outs-num{font-size:18px;font-weight:800;color:#eab308}.outs-name{font-size:10px;color:rgba(255,255,255,0.5)}
