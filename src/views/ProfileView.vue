@@ -3,15 +3,21 @@
     <div class="hub-tabs">
       <button v-for="t in tabs" :key="t.key" :class="['hub-tab', { active: activeTab === t.key }]" @click="activeTab = t.key">{{ t.icon }} {{ t.label }}</button>
     </div>
-    <KeepAlive>
-      <component :is="activeView" v-if="activeView" />
-    </KeepAlive>
+    <div v-show="activeTab === 'stats'">
+      <StatsView />
+    </div>
+    <div v-show="activeTab === 'profit'">
+      <ProfitLogView />
+    </div>
+    <div v-show="activeTab === 'handlog'">
+      <HandLogView />
+    </div>
     <div v-show="activeTab === 'settings'" class="settings-section">
       <h3 class="settings-title">设置</h3>
       <div class="setting-item">
         <div class="setting-info">
           <span class="setting-name">清除缓存</span>
-          <span class="setting-desc">清除 PWA 缓存和 Service Worker，获取最新版本</span>
+          <span class="setting-desc">清除 PWA 缓存和 Service Worker，获取最新版本，不影响训练、记牌和盈亏数据</span>
         </div>
         <button class="setting-btn danger" @click="clearCache">清除</button>
       </div>
@@ -22,29 +28,35 @@
         </div>
         <button class="setting-btn warn" @click="resetProgress">重置</button>
       </div>
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-name">清空盈亏记账</span>
+          <span class="setting-desc">仅删除扑克盈亏记录，不影响训练和记牌数据</span>
+        </div>
+        <button class="setting-btn danger" @click="resetProfitLog">清空</button>
+      </div>
       <p v-if="cacheMsg" class="cache-msg">{{ cacheMsg }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import StatsView from './StatsView.vue'
 import HandLogView from './HandLogView.vue'
+import ProfitLogView from './ProfitLogView.vue'
+import { useProfitStore } from '@/stores/profitStore'
 
 const activeTab = ref('stats')
-const tabViews = {
-  stats: StatsView,
-  handlog: HandLogView
-}
 const tabs = [
   { key: 'stats', icon: '📈', label: '进度' },
+  { key: 'profit', icon: '💰', label: '盈亏' },
   { key: 'handlog', icon: '📝', label: '记牌' },
   { key: 'settings', icon: '⚙️', label: '设置' }
 ]
-const activeView = computed(() => activeTab.value === 'settings' ? null : tabViews[activeTab.value as keyof typeof tabViews])
 
 const cacheMsg = ref('')
+const profitStore = useProfitStore()
 const TRAINING_STORAGE_KEYS = [
   'poker-gto-progress',
   'poker-gto-custom-ranges',
@@ -76,6 +88,12 @@ function resetProgress() {
     cacheMsg.value = '✅ 数据已重置，将自动刷新...'
     setTimeout(() => window.location.reload(), 1500)
   }
+}
+
+function resetProfitLog() {
+  if (!confirm('确定要清空所有盈亏记录吗？此操作不可撤销。')) return
+  profitStore.reset()
+  cacheMsg.value = '✅ 盈亏记录已清空'
 }
 </script>
 
