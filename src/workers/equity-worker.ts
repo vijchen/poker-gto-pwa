@@ -19,6 +19,10 @@ interface WorkerOutput {
   tie: number
 }
 
+interface WorkerErrorOutput {
+  error: string
+}
+
 const SUITS = ['s', 'h', 'd', 'c']
 const RANKS = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 
@@ -51,6 +55,10 @@ function runSimulation(input: WorkerInput): WorkerOutput {
   const excluded = [...heroCards, ...villainCards, ...board]
   const deck = buildDeck(excluded)
   const cardsNeeded = 5 - board.length
+  const heroBaseNums = heroCards.map(cardToNum)
+  const villainBaseNums = villainCards.map(cardToNum)
+  const boardBaseNums = board.map(cardToNum)
+  const deckNumMap = new Map(deck.map((card) => [card, cardToNum(card)]))
 
   let heroWins = 0
   let villainWins = 0
@@ -58,16 +66,12 @@ function runSimulation(input: WorkerInput): WorkerOutput {
 
   for (let i = 0; i < simulations; i++) {
     shuffle(deck)
-    const communityCards = [...board, ...deck.slice(0, cardsNeeded)]
-
-    const heroNums: CardNum[] = [
-      ...heroCards.map(cardToNum),
-      ...communityCards.map(cardToNum)
-    ]
-    const villainNums: CardNum[] = [
-      ...villainCards.map(cardToNum),
-      ...communityCards.map(cardToNum)
-    ]
+    const drawnBoardNums = deck
+      .slice(0, cardsNeeded)
+      .map((card) => deckNumMap.get(card)!)
+    const communityNums: CardNum[] = [...boardBaseNums, ...drawnBoardNums]
+    const heroNums: CardNum[] = [...heroBaseNums, ...communityNums]
+    const villainNums: CardNum[] = [...villainBaseNums, ...communityNums]
 
     const heroScore = evaluateHand(heroNums)
     const villainScore = evaluateHand(villainNums)
@@ -86,6 +90,12 @@ function runSimulation(input: WorkerInput): WorkerOutput {
 }
 
 self.onmessage = (e: MessageEvent<WorkerInput>) => {
-  const result = runSimulation(e.data)
-  self.postMessage(result)
+  try {
+    const result = runSimulation(e.data)
+    self.postMessage(result)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '未知错误'
+    const failure: WorkerErrorOutput = { error: `计算失败: ${message}` }
+    self.postMessage(failure)
+  }
 }

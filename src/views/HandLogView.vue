@@ -2,15 +2,16 @@
   <div class="handlog-page">
     <h2 class="page-title">📝 记牌本</h2>
     <div class="record-form">
-      <div class="form-row"><label>手牌</label><div class="card-inputs"><select v-model="newHand.card1" class="card-select"><option v-for="c in cardOptions" :key="c" :value="c">{{ c }}</option></select><select v-model="newHand.card2" class="card-select"><option v-for="c in cardOptions" :key="c" :value="c">{{ c }}</option></select></div></div>
+      <div class="form-row"><label>手牌</label><div class="card-inputs"><select v-model="newHand.card1" class="card-select"><option v-for="c in cardOptions" :key="c.code" :value="c.code">{{ c.label }}</option></select><select v-model="newHand.card2" class="card-select"><option v-for="c in cardOptions" :key="`second-${c.code}`" :value="c.code">{{ c.label }}</option></select></div></div>
       <div class="form-row"><label>位置</label><div class="pos-options"><button v-for="p in positions" :key="p" :class="['pos-opt', { active: newHand.position === p }]" @click="newHand.position = p">{{ p }}</button></div></div>
       <div class="form-row"><label>行动</label><div class="action-options"><button v-for="a in actions" :key="a.value" :class="['action-opt', { active: newHand.action === a.value }]" @click="newHand.action = a.value">{{ a.label }}</button></div></div>
       <div class="form-row"><label>结果</label><div class="result-options"><button :class="['result-opt','win',{active:newHand.result==='win'}]" @click="newHand.result='win'">赢</button><button :class="['result-opt','lose',{active:newHand.result==='lose'}]" @click="newHand.result='lose'">输</button><button :class="['result-opt','fold',{active:newHand.result==='fold'}]" @click="newHand.result='fold'">弃牌</button></div></div>
+      <p v-if="formError" class="form-error">{{ formError }}</p>
       <button class="btn-save" @click="saveHand">保存这手牌</button>
     </div>
     <div class="history"><div class="history-header"><h3>历史记录 ({{ hands.length }})</h3><button v-if="hands.length" class="btn-clear" @click="clearAll">清空</button></div>
       <div v-if="hands.length===0" class="empty">还没有记录</div>
-      <div v-for="(h,idx) in hands" :key="idx" class="hand-item"><div class="hand-cards">{{ h.card1 }} {{ h.card2 }}</div><span class="hand-pos">{{ h.position }}</span><span class="hand-action">{{ h.action }}</span><span :class="['hand-result',h.result]">{{ h.result==='win'?'赢':h.result==='lose'?'输':'弃' }}</span></div>
+      <div v-for="(h,idx) in hands" :key="idx" class="hand-item"><div class="hand-cards">{{ formatCardLabel(h.card1) }} {{ formatCardLabel(h.card2) }}</div><span class="hand-pos">{{ h.position }}</span><span class="hand-action">{{ h.action }}</span><span :class="['hand-result',h.result]">{{ h.result==='win'?'赢':h.result==='lose'?'输':'弃' }}</span></div>
     </div>
     <div v-if="hands.length>=5" class="stats-summary">
       <div class="stat-item"><span class="stat-label">总手数</span><span class="stat-val">{{ hands.length }}</span></div>
@@ -21,20 +22,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { POSITIONS } from '@/types/poker'
 interface HandRecord { card1: string; card2: string; position: string; action: string; result: string; time: number }
 const STORAGE_KEY = 'poker-gto-hand-log'
 const positions = POSITIONS
 const actions = [{label:'Open',value:'open'},{label:'Call',value:'call'},{label:'3-Bet',value:'3bet'},{label:'Fold',value:'fold'}]
-const cardOptions = (() => { const r=['A','K','Q','J','T','9','8','7','6','5','4','3','2'],s=['♠','♥','♦','♣'],c:string[]=[]; for(const x of r)for(const y of s)c.push(x+y); return c })()
+const SUIT_TO_SYMBOL: Record<string, string> = { s: '♠', h: '♥', d: '♦', c: '♣' }
+const SYMBOL_TO_SUIT: Record<string, string> = { '♠': 's', '♥': 'h', '♦': 'd', '♣': 'c' }
+const cardOptions = (() => {
+  const ranks=['A','K','Q','J','T','9','8','7','6','5','4','3','2']
+  const suits=['s','h','d','c']
+  return ranks.flatMap(rank => suits.map(suit => ({ code: `${rank}${suit}`, label: `${rank}${SUIT_TO_SYMBOL[suit]}` })))
+})()
 const hands = ref<HandRecord[]>([])
-const newHand = ref({card1:'A♠',card2:'K♥',position:'BTN',action:'open',result:'win'})
+const newHand = ref({card1:'As',card2:'Kh',position:'BTN',action:'open',result:'win'})
+const formError = ref('')
 const winRate = computed(()=>{const w=hands.value.filter(h=>h.result==='win').length,p=hands.value.filter(h=>h.result!=='fold').length;return p===0?0:Math.round((w/p)*100)})
 const vpip = computed(()=>{const p=hands.value.filter(h=>h.action!=='fold').length;return hands.value.length===0?0:Math.round((p/hands.value.length)*100)})
-function saveHand(){hands.value.unshift({...newHand.value,time:Date.now()});localStorage.setItem(STORAGE_KEY,JSON.stringify(hands.value))}
+
+function normalizeCardCode(card: string): string {
+  if (/^[AKQJT98765432][shdc]$/.test(card)) return card
+  const match = card.match(/^([AKQJT98765432])(♠|♥|♦|♣)$/)
+  if (match) return `${match[1]}${SYMBOL_TO_SUIT[match[2]]}`
+  return card
+}
+
+function formatCardLabel(card: string): string {
+  const normalized = normalizeCardCode(card)
+  return `${normalized[0]}${SUIT_TO_SYMBOL[normalized[1]] || ''}`
+}
+
+watch(() => [newHand.value.card1, newHand.value.card2], () => {
+  if (newHand.value.card1 !== newHand.value.card2) {
+    formError.value = ''
+  }
+})
+
+function saveHand(){
+  if (newHand.value.card1 === newHand.value.card2) {
+    formError.value = '两张底牌不能是同一张牌。'
+    return
+  }
+  formError.value = ''
+  hands.value.unshift({...newHand.value,time:Date.now()})
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(hands.value))
+}
 function clearAll(){hands.value=[];localStorage.removeItem(STORAGE_KEY)}
-onMounted(()=>{try{const r=localStorage.getItem(STORAGE_KEY);if(r)hands.value=JSON.parse(r)}catch{}})
+onMounted(()=>{try{const r=localStorage.getItem(STORAGE_KEY);if(r)hands.value=JSON.parse(r).map((hand: HandRecord)=>({...hand,card1:normalizeCardCode(hand.card1),card2:normalizeCardCode(hand.card2)}))}catch{}})
 </script>
 
 <style scoped>
@@ -48,6 +83,7 @@ onMounted(()=>{try{const r=localStorage.getItem(STORAGE_KEY);if(r)hands.value=JS
 .result-opt.win.active{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#34d399}
 .result-opt.lose.active{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:#f87171}
 .result-opt.fold.active{background:rgba(255,255,255,0.08);color:var(--text-secondary)}
+.form-error{margin:-2px 0 8px;color:#f87171;font-size:12px}
 .btn-save{width:100%;padding:12px;border:none;border-radius:var(--radius-md);background:var(--accent-green);color:#000;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
 .history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.history-header h3{font-size:14px;font-weight:700}
 .btn-clear{padding:4px 10px;border:1px solid rgba(239,68,68,0.3);border-radius:8px;background:transparent;color:#f87171;font-size:11px;cursor:pointer}

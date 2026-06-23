@@ -3,9 +3,10 @@
     <div class="hub-tabs">
       <button v-for="t in tabs" :key="t.key" :class="['hub-tab', { active: activeTab === t.key }]" @click="activeTab = t.key">{{ t.icon }} {{ t.label }}</button>
     </div>
-    <StatsView v-if="activeTab === 'stats'" />
-    <HandLogView v-if="activeTab === 'handlog'" />
-    <div v-if="activeTab === 'settings'" class="settings-section">
+    <KeepAlive>
+      <component :is="activeView" v-if="activeView" />
+    </KeepAlive>
+    <div v-show="activeTab === 'settings'" class="settings-section">
       <h3 class="settings-title">设置</h3>
       <div class="setting-item">
         <div class="setting-info">
@@ -27,18 +28,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import StatsView from './StatsView.vue'
 import HandLogView from './HandLogView.vue'
 
 const activeTab = ref('stats')
+const tabViews = {
+  stats: StatsView,
+  handlog: HandLogView
+}
 const tabs = [
   { key: 'stats', icon: '📈', label: '进度' },
   { key: 'handlog', icon: '📝', label: '记牌' },
   { key: 'settings', icon: '⚙️', label: '设置' }
 ]
+const activeView = computed(() => activeTab.value === 'settings' ? null : tabViews[activeTab.value as keyof typeof tabViews])
 
 const cacheMsg = ref('')
+const TRAINING_STORAGE_KEYS = [
+  'poker-gto-progress',
+  'poker-gto-custom-ranges',
+  'poker-gto-hand-log'
+]
 
 async function clearCache() {
   try {
@@ -59,7 +70,9 @@ async function clearCache() {
 
 function resetProgress() {
   if (confirm('确定要清除所有训练进度吗？此操作不可撤销。')) {
-    localStorage.clear()
+    for (const key of TRAINING_STORAGE_KEYS) {
+      localStorage.removeItem(key)
+    }
     cacheMsg.value = '✅ 数据已重置，将自动刷新...'
     setTimeout(() => window.location.reload(), 1500)
   }

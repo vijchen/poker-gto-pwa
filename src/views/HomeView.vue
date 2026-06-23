@@ -15,7 +15,7 @@
           @click="setPositionDirect(pos.name)">
           {{ pos.name }}
         </div>
-        <div class="table-center">{{ openPct }}%</div>
+        <div class="table-center">{{ openPctLabel }}</div>
       </div>
     </div>
 
@@ -30,7 +30,9 @@
         :class="['opener-btn', { active: openerPosition === pos }]" @click="setOpenerPosition(pos)">{{ pos }}</button>
     </div>
 
-    <HandMatrix :get-action="getAction" @select="handleSelect" />
+    <div v-if="rangeError" class="load-state error">{{ rangeError }}</div>
+    <div v-else-if="isRangeLoading" class="load-state">正在加载范围数据...</div>
+    <HandMatrix v-else :get-action="getAction" @select="handleSelect" />
 
     <!-- 颜色图例 -->
     <div class="legend">
@@ -48,10 +50,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import type { Scenario, HandAction, Position } from '@/types/poker'
 import { usePosition } from '@/composables/usePosition'
 import { useRange } from '@/composables/useRange'
+import { loadOpenRanges, type RangeMap } from '@/data/ranges/loaders'
 import PositionBar from '@/components/PositionBar.vue'
 import HandMatrix from '@/components/HandMatrix.vue'
 import StrategyPopup from '@/components/StrategyPopup.vue'
@@ -70,10 +73,35 @@ const tablePositions = [
   { name: 'BB' as Position, style: 'bottom: 15%; left: 20%' }
 ]
 
-const openPctMap: Record<Position, number> = {
-  UTG: 10, UTG1: 14, MP: 18, HJ: 22, CO: 31, BTN: 46, SB: 39, BB: 0
+const openRanges = ref<RangeMap | null>(null)
+const openDataError = ref('')
+
+function countHandCombos(handName: string): number {
+  if (handName.length === 2) return 6
+  return handName.endsWith('s') ? 4 : 12
 }
-const openPct = computed(() => openPctMap[currentPosition.value] || 0)
+
+function getActionWeight(action: HandAction): number {
+  if (action.action === 'raise' || action.action === 'call') return 1
+  if (action.action === 'mixed' && action.frequency) {
+    return (action.frequency.raise || 0) + (action.frequency.call || 0)
+  }
+  return 0
+}
+
+function getOpenPct(position: Position): number {
+  const range = openRanges.value?.[position]
+  if (!range) return 0
+
+  const combos = Object.entries(range).reduce((sum, [handName, action]) => {
+    return sum + countHandCombos(handName) * getActionWeight(action)
+  }, 0)
+
+  return Math.round((combos / 1326) * 100)
+}
+
+const openPct = computed(() => getOpenPct(currentPosition.value))
+const openPctLabel = computed(() => (openRanges.value ? `${openPct.value}%` : '...'))
 
 function setPositionDirect(pos: Position) { setPosition(pos) }
 const scenarios: { key: Scenario; label: string }[] = [
@@ -82,10 +110,20 @@ const scenarios: { key: Scenario; label: string }[] = [
   { key: 'vsOpen', label: 'vs Open' }
 ]
 
-const { getAction, openerPosition, setOpenerPosition, getValidOpeners } = useRange(
+const { getAction, openerPosition, setOpenerPosition, getValidOpeners, isLoading: isScenarioLoading, error: scenarioError } = useRange(
   () => currentPosition.value, () => currentScenario.value
 )
 const validOpeners = computed(() => getValidOpeners(currentPosition.value))
+const isRangeLoading = computed(() => !openRanges.value || isScenarioLoading.value)
+const rangeError = computed(() => openDataError.value || scenarioError.value)
+
+onMounted(async () => {
+  try {
+    openRanges.value = await loadOpenRanges()
+  } catch {
+    openDataError.value = '范围数据加载失败，请刷新后重试。'
+  }
+})
 
 watch([() => currentPosition.value, () => currentScenario.value], () => {
   if (currentScenario.value === 'vsOpen') {
@@ -101,6 +139,7 @@ const selectedHand = ref('')
 const selectedAction = ref<HandAction>({ action: 'fold' })
 
 function handleSelect(handName: string, row: number, col: number) {
+  if (isRangeLoading.value) return
   selectedHand.value = handName
   selectedAction.value = getAction(row, col)
   popupVisible.value = true
@@ -158,6 +197,20 @@ function handleSelect(handName: string, row: number, col: number) {
 .table-center {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--accent-gold);
+}
+.load-state {
+  margin: 8px 16px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 12px;
+}
+.load-state.error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #fca5a5;
 }
 .data-source {
   padding: 8px 16px; margin: 4px 0 60px; font-size: 9px; color: rgba(255,255,255,0.3);

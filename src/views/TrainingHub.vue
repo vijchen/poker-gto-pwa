@@ -3,24 +3,30 @@
     <div class="hub-tabs">
       <button v-for="t in tabs" :key="t.key" :class="['hub-tab', { active: activeTab === t.key }]" @click="activeTab = t.key">{{ t.icon }} {{ t.label }}</button>
     </div>
-    <TrainView v-if="activeTab === 'preflop'" />
-    <PostflopView v-if="activeTab === 'postflop'" />
-    <OddsView v-if="activeTab === 'odds'" />
+    <KeepAlive>
+      <component :is="activeView" />
+    </KeepAlive>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import TrainView from './TrainView.vue'
 import PostflopView from './PostflopView.vue'
 import OddsView from './OddsView.vue'
 
 const activeTab = ref('preflop')
+const tabViews = {
+  preflop: TrainView,
+  postflop: PostflopView,
+  odds: OddsView
+}
 const tabs = [
   { key: 'preflop', icon: '🏋️', label: '翻前' },
   { key: 'postflop', icon: '🏆', label: '翻后' },
   { key: 'odds', icon: '🧮', label: '赔率' }
 ]
+const activeView = computed(() => tabViews[activeTab.value as keyof typeof tabViews])
 </script>
 
 <style scoped>

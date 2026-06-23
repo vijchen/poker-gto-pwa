@@ -8,7 +8,7 @@ export const advancedScenarios: PreflopAdvScenario[] = [
   // === 原有 15 题（保留）===
   { hand: 'AJs', position: 'CO', situation: 'UTG开池2.5BB', question: 'CO面对UTG开池AJs？', options: ['弃牌', '跟注', '3-bet 7BB'], correctIdx: 2, difficulty: '进阶', explain: 'AJs有位置3-bet隔离或拿下底池。', category: 'vs-open' },
   { hand: 'KQo', position: 'BTN', situation: 'CO开池2.5BB', question: 'BTN面对CO KQo？', options: ['弃牌', '跟注', '3-bet 8BB'], correctIdx: 2, difficulty: '入门', explain: 'KQo BTN对CO标准3-bet。', category: 'vs-open' },
-  { hand: '55', position: 'UTG', situation: '无动作', question: 'UTG位55？', options: ['弃牌', '开池2.5BB'], correctIdx: 0, difficulty: '进阶', explain: '55在UTG边缘solver倾向弃牌。', category: 'open' },
+  { hand: '55', position: 'UTG', situation: '无动作', question: 'UTG位55？', options: ['弃牌', '开池2.5BB'], correctIdx: 0, difficulty: '进阶', explain: '按本应用当前默认范围设定，UTG 的 55 仍归为弃牌边缘手牌。', category: 'open' },
   { hand: 'A5s', position: 'SB', situation: 'fold到SB', question: 'SB A5s？', options: ['弃牌', '完成小盲', '加注3BB'], correctIdx: 2, difficulty: '入门', explain: 'A5s对BB标准开池。', category: 'sb-vs-bb' },
   { hand: 'TT', position: 'BB', situation: 'BTN开池2.5BB SB弃', question: 'BB TT？', options: ['跟注', '3-bet 9BB', '3-bet 12BB'], correctIdx: 1, difficulty: '进阶', explain: 'TT对BTN宽范围标准3-bet。', category: 'bb-defense' },
   { hand: 'QJs', position: 'MP', situation: 'UTG开池2.5BB', question: 'MP QJs？', options: ['弃牌', '跟注', '3-bet'], correctIdx: 1, difficulty: '困难', explain: 'QJs对UTG紧范围跟注更好。', category: 'vs-open' },
@@ -18,7 +18,7 @@ export const advancedScenarios: PreflopAdvScenario[] = [
   { hand: 'A2s', position: 'BTN', situation: 'fold到BTN', question: 'BTN A2s？', options: ['弃牌', '开池2.5BB'], correctIdx: 1, difficulty: '入门', explain: 'BTN标准开池坚果同花潜力。', category: 'open' },
   { hand: 'KK', position: 'SB', situation: 'UTG开CO 3-bet 9BB', question: 'SB KK？', options: ['跟注慢打', '4-bet 25BB', '全押'], correctIdx: 1, difficulty: '进阶', explain: 'KK明确4-bet SB没位置。', category: 'vs-3bet' },
   { hand: '76s', position: 'CO', situation: 'fold到CO', question: 'CO 76s？', options: ['弃牌', '开池2.5BB'], correctIdx: 1, difficulty: '入门', explain: 'CO标准开池好连接性。', category: 'open' },
-  { hand: 'AQo', position: 'MP', situation: 'UTG开池', question: 'MP AQo？', options: ['弃牌', '跟注', '3-bet 8BB'], correctIdx: 2, difficulty: '困难', explain: 'AQo对UTG 3-bet有阻隔牌价值。', category: 'vs-open' },
+  { hand: 'AQo', position: 'MP', situation: 'UTG开池', question: 'MP AQo？', options: ['弃牌', '跟注', '3-bet 8BB'], correctIdx: 2, difficulty: '困难', explain: '在本应用默认策略里，AQo 更偏向用阻隔牌优势做 3-bet，而不是被动平跟。', category: 'vs-open' },
   { hand: 'J9s', position: 'BB', situation: 'SB limp', question: 'BB J9s？', options: ['过牌', '加注3BB'], correctIdx: 1, difficulty: '入门', explain: 'J9s对limp加注惩罚弱范围。', category: 'bb-defense' },
   { hand: 'QQ', position: 'UTG', situation: 'BTN 3-bet后SB cold 4-bet 22BB', question: 'QQ面对cold 4-bet？', options: ['弃牌', '跟注', '5-bet全押'], correctIdx: 1, difficulty: '困难', explain: 'Cold 4-bet极强QQ跟注看翻牌。', category: 'vs-4bet' },
 
@@ -45,7 +45,7 @@ export const advancedScenarios: PreflopAdvScenario[] = [
   { hand: '93o', position: 'SB', situation: 'fold到SB', question: 'SB 93o？', options: ['弃牌', '完成小盲', '加注2.5BB'], correctIdx: 0, difficulty: '入门', explain: '93o太弱即使对BB也弃牌，无连接性无高牌。', category: 'sb-vs-bb' },
   { hand: 'T8s', position: 'SB', situation: 'fold到SB', question: 'SB T8s？', options: ['弃牌', '完成小盲', '加注3BB'], correctIdx: 2, difficulty: '入门', explain: 'T8s有同花和连接性，标准开池。', category: 'sb-vs-bb' },
   { hand: 'Q4s', position: 'SB', situation: 'fold到SB', question: 'SB Q4s？', options: ['弃牌', '完成小盲', '加注2.5BB'], correctIdx: 2, difficulty: '进阶', explain: 'Q4s在SB边缘开池，有同花潜力就够了。', category: 'sb-vs-bb' },
-  { hand: 'J6o', position: 'SB', situation: 'fold到SB', question: 'SB J6o？', options: ['弃牌', '完成小盲', '加注2.5BB'], correctIdx: 2, difficulty: '进阶', explain: 'J6o SB对BB仍然开池，solver频率约60%。', category: 'sb-vs-bb' },
+  { hand: 'J6o', position: 'SB', situation: 'fold到SB', question: 'SB J6o？', options: ['弃牌', '完成小盲', '加注2.5BB'], correctIdx: 2, difficulty: '进阶', explain: '在这套默认 SB vs BB 范围里，J6o 仍归入可以主动开池的手牌。', category: 'sb-vs-bb' },
   { hand: '72o', position: 'SB', situation: 'fold到SB', question: 'SB 72o？', options: ['弃牌', '完成小盲', '加注2.5BB'], correctIdx: 0, difficulty: '入门', explain: '72o最差起手牌之一，即使SB也弃牌。', category: 'sb-vs-bb' },
 
   // --- Cold Call 场景 (5 题) ---
@@ -66,8 +66,8 @@ export const advancedScenarios: PreflopAdvScenario[] = [
   // --- 综合进阶场景 (6 题) ---
   { hand: 'AA', position: 'UTG', situation: '100BB深度 无动作', question: 'UTG AA开池大小？', options: ['2BB', '2.5BB', '3BB'], correctIdx: 1, difficulty: '入门', explain: 'AA标准2.5BB开池不暴露手牌强度。', category: 'open' },
   { hand: '97s', position: 'BTN', situation: 'fold到BTN', question: 'BTN 97s？', options: ['弃牌', '开池2.5BB', '开池3BB'], correctIdx: 1, difficulty: '入门', explain: '97s在BTN属于标准开池范围。', category: 'open' },
-  { hand: 'AJo', position: 'UTG1', situation: '无动作', question: 'UTG1 AJo？', options: ['弃牌', '开池2.5BB'], correctIdx: 1, difficulty: '进阶', explain: 'AJo在UTG1边缘开池，solver约50-60%频率。', category: 'open' },
+  { hand: 'AJo', position: 'UTG1', situation: '无动作', question: 'UTG1 AJo？', options: ['弃牌', '开池2.5BB'], correctIdx: 1, difficulty: '进阶', explain: '按本应用当前默认范围，AJo 在 UTG1 仍被归为可以开池的边缘牌。', category: 'open' },
   { hand: 'KTo', position: 'MP', situation: 'UTG开池2.5BB', question: 'MP KTo面对UTG？', options: ['弃牌', '跟注', '3-bet'], correctIdx: 0, difficulty: '进阶', explain: 'KTo对UTG紧范围被dominate，无位置优势弃牌。', category: 'vs-open' },
   { hand: 'JJ', position: 'BB', situation: 'UTG开2.5BB CO 3-bet 8BB', question: 'BB JJ cold call 3-bet？', options: ['弃牌', '跟注', '4-bet 22BB'], correctIdx: 1, difficulty: '困难', explain: 'BB JJ cold call 3-bet，没位置4-bet太aggressive。', category: 'cold-call' },
-  { hand: 'T9o', position: 'HJ', situation: 'fold到HJ', question: 'HJ T9o？', options: ['弃牌', '开池2.5BB'], correctIdx: 0, difficulty: '困难', explain: 'T9o在HJ不够强开池，solver弃牌频率高。', category: 'open' }
+  { hand: 'T9o', position: 'HJ', situation: 'fold到HJ', question: 'HJ T9o？', options: ['弃牌', '开池2.5BB'], correctIdx: 0, difficulty: '困难', explain: '按本应用当前默认范围，HJ 的 T9o 仍偏向弃牌，不把它放进常规开池段。', category: 'open' }
 ]

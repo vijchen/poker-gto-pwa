@@ -3,7 +3,7 @@
     <h2 class="page-title">翻前训练</h2>
 
     <div class="train-mode">
-      <button :class="['mode-btn', { active: trainMode === 'basic' }]" @click="trainMode = 'basic'; nextHand()">开池训练</button>
+      <button :class="['mode-btn', { active: trainMode === 'basic' }]" @click="switchToBasic">开池训练</button>
       <button :class="['mode-btn', { active: trainMode === 'advanced' }]" @click="trainMode = 'advanced'; advIdx = 0; advAnswered = false">进阶场景</button>
     </div>
 
@@ -14,6 +14,9 @@
     </div>
 
     <template v-if="trainMode === 'basic'">
+    <div v-if="isRangeLoading" class="load-card">正在加载训练范围...</div>
+    <div v-else-if="rangeLoadError" class="load-card error">{{ rangeLoadError }}</div>
+    <template v-else>
 
     <div class="hand-display">
       <div class="card-visual" :class="suitClass(currentHand[0])">{{ formatCard(currentHand[0]) }}</div>
@@ -47,6 +50,7 @@
       <button class="btn-next" @click="nextHand">下一手 →</button>
     </div>
     </template>
+    </template>
 
     <!-- 进阶场景 -->
     <template v-if="trainMode === 'advanced'">
@@ -72,12 +76,15 @@
 import { ref, computed, onMounted } from 'vue'
 import type { Position, HandAction } from '@/types/poker'
 import { POSITIONS, RANKS } from '@/types/poker'
-import openData from '@/data/ranges/open.json'
+import { loadOpenRanges, type RangeMap } from '@/data/ranges/loaders'
 import { advancedScenarios } from '@/data/preflop-advanced'
 import { useProgressStore } from '@/stores/progressStore'
 
 const trainMode = ref<'basic' | 'advanced'>('basic')
 const progressStore = useProgressStore()
+const openRanges = ref<RangeMap | null>(null)
+const isRangeLoading = ref(true)
+const rangeLoadError = ref('')
 
 // State
 const currentHand = ref<[string, string]>(['As', 'Kh'])
@@ -88,6 +95,7 @@ const gtoAction = ref<string>('fold')
 const totalPlayed = ref(0)
 const totalCorrect = ref(0)
 const streak = ref(0)
+const isRangeReady = computed(() => !!openRanges.value && !isRangeLoading.value)
 
 const accuracy = computed(() => {
   if (totalPlayed.value === 0) return 0
@@ -139,7 +147,7 @@ function randomHand(): { cards: [string, string]; handName: string; position: Po
 }
 
 function getGtoAction(handName: string, position: Position): HandAction {
-  const posData = (openData as any)[position]
+  const posData = openRanges.value?.[position]
   if (!posData) return { action: 'fold' }
   return posData[handName] || { action: 'fold' }
 }
@@ -162,7 +170,13 @@ const evLoss = computed(() => {
 
 let currentHandName = ''
 
+function switchToBasic() {
+  trainMode.value = 'basic'
+  if (isRangeReady.value) nextHand()
+}
+
 function nextHand() {
+  if (!isRangeReady.value) return
   const { cards, handName, position } = randomHand()
   currentHand.value = cards
   currentPosition.value = position
@@ -171,6 +185,7 @@ function nextHand() {
 }
 
 function decide(userAction: 'raise' | 'fold') {
+  if (!isRangeReady.value) return
   const gto = getGtoAction(currentHandName, currentPosition.value)
   gtoAction.value = gto.action
 
@@ -187,7 +202,17 @@ function decide(userAction: 'raise' | 'fold') {
   showResult.value = true
 }
 
-onMounted(() => nextHand())
+onMounted(async () => {
+  try {
+    openRanges.value = await loadOpenRanges()
+    isRangeLoading.value = false
+    if (trainMode.value === 'basic') nextHand()
+  } catch {
+    rangeLoadError.value = '训练范围加载失败，请刷新后重试。'
+  } finally {
+    isRangeLoading.value = false
+  }
+})
 
 // === Advanced mode ===
 const advIdx = ref(0)
@@ -247,6 +272,20 @@ function resetAdv() { advIdx.value = 0; advAnswered.value = false }
 .train-mode { display: flex; gap: 6px; margin-bottom: 14px; width: 100%; }
 .mode-btn { flex: 1; padding: 8px; border-radius: 10px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; }
 .mode-btn.active { background: var(--accent-green-dim); border-color: var(--border-active); color: var(--accent-green); }
+.load-card {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 18px;
+}
+.load-card.error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #fca5a5;
+}
 .adv-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 18px; width: 100%; }
 .adv-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .adv-hand { font-family: var(--font-display); font-size: 20px; font-weight: 900; }

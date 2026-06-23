@@ -3,24 +3,30 @@
     <div class="hub-tabs">
       <button v-for="t in tabs" :key="t.key" :class="['hub-tab', { active: activeTab === t.key }]" @click="activeTab = t.key">{{ t.icon }} {{ t.label }}</button>
     </div>
-    <EquityView v-if="activeTab === 'equity'" />
-    <OddsView v-if="activeTab === 'odds'" />
-    <RangesView v-if="activeTab === 'ranges'" />
+    <KeepAlive>
+      <component :is="activeView" />
+    </KeepAlive>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import EquityView from './EquityView.vue'
 import OddsView from './OddsView.vue'
 import RangesView from './RangesView.vue'
 
 const activeTab = ref('equity')
+const tabViews = {
+  equity: EquityView,
+  odds: OddsView,
+  ranges: RangesView
+}
 const tabs = [
   { key: 'equity', icon: '📊', label: '胜率' },
   { key: 'odds', icon: '🧮', label: '赔率' },
   { key: 'ranges', icon: '✏️', label: '范围' }
 ]
+const activeView = computed(() => tabViews[activeTab.value as keyof typeof tabViews])
 </script>
 
 <style scoped>

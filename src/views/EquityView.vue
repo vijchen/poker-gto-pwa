@@ -23,6 +23,7 @@
             :class="['range-btn', { active: selectedRange === r.key }]"
             @click="selectedRange = r.key">{{ r.label }}</button>
         </div>
+        <p v-if="isRangeLoading" class="helper-text">正在加载范围数据...</p>
       </div>
     </template>
 
@@ -46,6 +47,10 @@
       <p>⚠️ {{ error }}</p>
     </div>
 
+    <div v-if="rangeLoadError" class="error-card">
+      <p>⚠️ {{ rangeLoadError }}</p>
+    </div>
+
     <div v-if="mode === 'range'" class="range-info">
       <p>💡 从对手位置的 open 范围中随机抽取手牌模拟，结果为对抗该范围的近似胜率。</p>
     </div>
@@ -53,32 +58,67 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import type { HandAction, Position } from '@/types/poker'
 import CardPicker from '@/components/CardPicker.vue'
 import { useEquity } from '@/composables/useEquity'
-import openData from '@/data/ranges/open.json'
+import { loadOpenRanges, type RangeMap } from '@/data/ranges/loaders'
 
 const mode = ref<'hand' | 'range'>('range')
 const heroCards = ref<string[]>([])
 const villainCards = ref<string[]>([])
 const boardCards = ref<string[]>([])
 const selectedRange = ref('CO')
+const openRanges = ref<RangeMap | null>(null)
+const isRangeLoading = ref(true)
+const rangeLoadError = ref('')
 
-const rangePresets = [
-  { key: 'UTG', label: 'UTG 12%' },
-  { key: 'UTG1', label: 'UTG1 14%' },
-  { key: 'MP', label: 'MP 17%' },
-  { key: 'HJ', label: 'HJ 21%' },
-  { key: 'CO', label: 'CO 27%' },
-  { key: 'BTN', label: 'BTN 42%' },
-  { key: 'SB', label: 'SB 35%' }
-]
+function countHandCombos(handName: string): number {
+  if (handName.length === 2) return 6
+  return handName.endsWith('s') ? 4 : 12
+}
+
+function getActionWeight(action: HandAction): number {
+  if (action.action === 'raise' || action.action === 'call') return 1
+  if (action.action === 'mixed' && action.frequency) {
+    return (action.frequency.raise || 0) + (action.frequency.call || 0)
+  }
+  return 0
+}
+
+function getOpenPct(position: Position): number {
+  const range = openRanges.value?.[position]
+  if (!range) return 0
+
+  const combos = Object.entries(range).reduce((sum, [handName, action]) => {
+    return sum + countHandCombos(handName) * getActionWeight(action)
+  }, 0)
+
+  return Math.round((combos / 1326) * 100)
+}
+
+const rangePositions: Position[] = ['UTG', 'UTG1', 'MP', 'HJ', 'CO', 'BTN', 'SB']
+const rangePresets = computed(() => rangePositions.map((position) => ({
+  key: position,
+  label: openRanges.value ? `${position} ${getOpenPct(position)}%` : position
+})))
 
 const { isCalculating, result, error, calculate, reset } = useEquity()
+
+onMounted(async () => {
+  try {
+    openRanges.value = await loadOpenRanges()
+  } catch {
+    rangeLoadError.value = '范围数据加载失败，请稍后重试。'
+  } finally {
+    isRangeLoading.value = false
+  }
+})
 
 const canCalc = computed(() => {
   if (heroCards.value.length !== 2) return false
   if (mode.value === 'hand' && villainCards.value.length !== 2) return false
+  if (mode.value === 'range' && (!openRanges.value || isRangeLoading.value)) return false
   return true
 })
 
@@ -113,7 +153,7 @@ function handleCalc() {
   if (mode.value === 'hand') {
     calculate(heroCards.value, villainCards.value, boardCards.value)
   } else {
-    const posData = (openData as any)[selectedRange.value]
+    const posData = openRanges.value?.[selectedRange.value]
     if (!posData) return
     const playable = Object.entries(posData).filter(([_, v]: any) => v.action === 'raise' || v.action === 'mixed').map(([k]) => k)
     if (playable.length === 0) return
@@ -145,6 +185,7 @@ function handleReset() {
 .range-select { padding: 12px 0; }
 .range-select label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px; }
 .range-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.helper-text { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
 .range-btn { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; }
 .range-btn.active { background: var(--accent-green-dim); border-color: var(--border-active); color: var(--accent-green); }
 .action-area { display: flex; gap: 10px; padding: 16px 0; }

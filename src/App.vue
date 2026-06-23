@@ -31,12 +31,14 @@
 </template>
 
 <script setup lang="ts">
+import { useProgressStore } from '@/stores/progressStore'
 import { RouterView, RouterLink } from 'vue-router'
+
+const progressStore = useProgressStore()
+progressStore.initialize()
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 :root {
   --bg-primary: #0a0e1a;
   --bg-secondary: #111827;
@@ -52,8 +54,8 @@ import { RouterView, RouterLink } from 'vue-router'
   --text-primary: #f1f5f9;
   --text-secondary: rgba(241, 245, 249, 0.6);
   --text-muted: rgba(241, 245, 249, 0.35);
-  --font-display: 'Outfit', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Avenir Next', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-body: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;

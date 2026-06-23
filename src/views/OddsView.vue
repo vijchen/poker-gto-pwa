@@ -33,7 +33,7 @@
           <button class="btn-next" @click="nextQuiz">下一题 →</button>
         </div>
       </div>
-      <div v-if="quizTotal > 0 && !quizAnswered && quizTotal % 20 === 0" class="milestone"><p>🎯 已完成 {{ quizTotal }} 题！正确率 {{ Math.round(quizCorrect/quizTotal*100) }}%</p><button class="btn-next" @click="nextQuiz">继续练习 →</button><button class="btn-next" style="margin-top:6px;opacity:0.6" @click="resetQuiz">重置统计</button></div>
+      <div v-if="showMilestone" class="milestone"><p>🎯 已完成 {{ quizTotal }} 题！正确率 {{ Math.round(quizCorrect/quizTotal*100) }}%</p><button class="btn-next" @click="dismissMilestone">继续练习 →</button><button class="btn-next" style="margin-top:6px;opacity:0.6" @click="resetQuiz">重置统计</button></div>
     </template>
   </div>
 </template>
@@ -44,9 +44,11 @@ import { useProgressStore } from '@/stores/progressStore'
 const progressStore = useProgressStore()
 const mode = ref<'calc'|'quiz'>('calc')
 const pot = ref(6), bet = ref(2), outs = ref(9), street = ref<'flop'|'turn'>('flop')
+const milestoneDismissedAt = ref<number | null>(null)
 const potOdds = computed(()=>{const t=pot.value+bet.value;return t===0?0:Math.round((bet.value/t)*100)})
 const equity = computed(()=>Math.min(outs.value*(street.value==='flop'?4:2),100))
 const canCall = computed(()=>equity.value>=potOdds.value)
+const showMilestone = computed(() => quizTotal.value > 0 && !quizAnswered.value && quizTotal.value % 20 === 0 && milestoneDismissedAt.value !== quizTotal.value)
 const outsRef=[{name:'同花听牌',outs:9},{name:'两头顺听',outs:8},{name:'卡顺听牌',outs:4},{name:'两高张',outs:6},{name:'同花+顺',outs:15},{name:'一对变三条',outs:2}]
 function adjustPot(d:number){pot.value=Math.max(0,pot.value+d)}
 function adjustBet(d:number){bet.value=Math.max(0.5,bet.value+d)}
@@ -82,7 +84,8 @@ const quizPotOdds=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQu
 const quizEquity=computed(()=>{if(!currentQuiz.value)return 0;const q=currentQuiz.value;return Math.min(q.outs*(q.street==='flop'?4:2),100)})
 function answerQuiz(call:boolean){const c=quizEquity.value>=quizPotOdds.value;quizIsCorrect.value=call===c;quizTotal.value++;if(quizIsCorrect.value)quizCorrect.value++;progressStore.recordAnswer('odds',quizIsCorrect.value);quizAnswered.value=true}
 function nextQuiz(){currentQuiz.value=generateQuiz();quizAnswered.value=false}
-function resetQuiz(){quizCorrect.value=0;quizTotal.value=0;currentQuiz.value=generateQuiz();quizAnswered.value=false}
+function dismissMilestone(){milestoneDismissedAt.value=quizTotal.value;nextQuiz()}
+function resetQuiz(){quizCorrect.value=0;quizTotal.value=0;milestoneDismissedAt.value=null;currentQuiz.value=generateQuiz();quizAnswered.value=false}
 </script>
 
 <style scoped>

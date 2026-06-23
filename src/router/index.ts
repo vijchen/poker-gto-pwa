@@ -7,7 +7,8 @@ const router = createRouter({
     { path: '/train', name: 'train', component: () => import('@/views/TrainingHub.vue') },
     { path: '/tools', name: 'tools', component: () => import('@/views/ToolsView.vue') },
     { path: '/learn', name: 'learn', component: () => import('@/views/LearnView.vue') },
-    { path: '/me', name: 'me', component: () => import('@/views/ProfileView.vue') }
+    { path: '/me', name: 'me', component: () => import('@/views/ProfileView.vue') },
+    { path: '/:pathMatch(.*)*', redirect: '/' }
   ]
 })
 

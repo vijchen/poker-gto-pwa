@@ -58,7 +58,7 @@ export const scenarios: PostflopScenario[] = [
     situation: '你在BB位防守vs CO open。翻牌 A♠9♠2♣。CO下注1/2底池。',
     options: [{ label: '跟注', action: 'call' }, { label: 'Check-Raise 3x', action: 'raise' }, { label: '弃牌', action: 'fold' }],
     correctAction: 'raise',
-    explanation: '同花听牌（9 outs）+ 后门顺子。有坚果同花听牌时check-raise是GTO标准诈唬，可以代表A或暗三，即使被跟注仍有~35% equity。'
+    explanation: '同花听牌（9 outs）+ 一些顺子改进空间。面对 CO 的持续下注，用这类听牌做 check-raise 半诈唬是常见进攻线；即使被跟注，通常也仍保有可观 equity。'
   },
   {
     id: 7, title: '面对C-Bet的浮牌', difficulty: '进阶', category: '防守',
@@ -109,12 +109,12 @@ export const scenarios: PostflopScenario[] = [
     explanation: '超池下注代表极化范围。对手价值范围有两对+和顺子(QT)。KQ只赢诈唬，但这条线路诈唬频率很低。弃牌正确。'
   },
   {
-    id: 13, title: '阻隔牌诈唬', difficulty: '困难', category: '诈唬',
-    heroCards: ['Ad', 'Jh'], board: ['Ks', 'Qs', '8c', '4d', 'Ts'],
-    situation: '河牌T♠完成同花和顺子。你先行动。',
+    id: 13, title: '河牌顺子取值', difficulty: '困难', category: '价值下注',
+    heroCards: ['Ad', 'Jh'], board: ['Ks', 'Qd', '8c', '4d', 'Ts'],
+    situation: '河牌 T♠ 让你做成 Broadway 顺子。你先行动。',
     options: [{ label: '下注 3/4 pot', action: 'bet-large' }, { label: '下注 1/3 pot', action: 'bet-small' }, { label: '过牌', action: 'check' }],
     correctAction: 'bet-large',
-    explanation: '经典阻隔牌诈唬。A阻隔了对手坚果同花(As)组合，J完成了Broadway顺子(AKQJT)的代表。大注诈唬可信度高，对手没有同花/顺子时很难用Kx跟注。'
+    explanation: 'AJ 在这里做成 Broadway 顺子。面对两对、set 或强 Kx 这类 bluff-catcher，大尺寸价值下注更容易榨到足够多的支付。'
   },
   {
     id: 14, title: '转牌过牌控池', difficulty: '困难', category: '控池',
@@ -130,13 +130,13 @@ export const scenarios: PostflopScenario[] = [
     situation: '3-bet pot，翻牌你下注对手跟注，转牌过牌过牌。河牌K♥配对。你先行动。',
     options: [{ label: '下注 1/4 pot', action: 'bet-small' }, { label: '下注全pot', action: 'bet-large' }, { label: '过牌', action: 'check' }],
     correctAction: 'bet-large',
-    explanation: 'AA变成full house(AAK)，3-bet pot中你有坚果优势。对手可能有77/55等口袋对会当bluff catcher跟注。全底池榨取最大价值。'
+    explanation: 'AA 在这里变成 Aces full of Kings。3-bet pot 中你拥有非常强的价值优势，对手的 77/55 或部分 Kx 可能仍会支付，大注更适合榨取最大价值。'
   },
   { id: 16, title: '干燥面小注高频', difficulty: '入门', category: 'C-Bet', heroCards: ['Kd', 'Qd'], board: ['Ah', '7c', '2s'], situation: 'CO open BTN跟。翻牌A♥7♣2♠极干燥。你先行动。', options: [{ label: '下注1/3', action: 'bet-small' }, { label: '下注2/3', action: 'bet-medium' }, { label: '过牌', action: 'check' }], correctAction: 'bet-small', explanation: '干燥A高面你有范围优势。小注高频下注让对手难以应对。' },
   { id: 17, title: '配对面暗三', difficulty: '入门', category: '价值下注', heroCards: ['7h', '7d'], board: ['7s', 'Kc', '3d'], situation: 'MP open CO跟。翻牌7♠K♣3♦。你先行动。', options: [{ label: '下注1/3', action: 'bet-small' }, { label: '下注2/3', action: 'bet-medium' }, { label: '过牌', action: 'check' }], correctAction: 'bet-small', explanation: '底set极强。小注从Kx和中对获取价值。' },
   { id: 18, title: '河牌弱对showdown', difficulty: '入门', category: '控池', heroCards: ['Ah', '9h'], board: ['9c', '5d', '2s', 'Jh', '4c'], situation: '翻牌C-Bet对手跟，转牌J♥过牌过牌。河牌4♣。', options: [{ label: '下注1/3', action: 'bet-small' }, { label: '下注2/3', action: 'bet-medium' }, { label: '过牌', action: 'check' }], correctAction: 'check', explanation: '中对在J出来后变弱。过牌到摊牌。' },
   { id: 19, title: '顶对面对加注', difficulty: '进阶', category: '防守', heroCards: ['As', 'Jc'], board: ['Jh', '8d', '3c'], situation: 'BTN open BB跟。翻牌C-Bet 1/3，BB check-raise 3倍。', options: [{ label: '弃牌', action: 'fold' }, { label: '跟注', action: 'call' }, { label: '再加注', action: 'raise' }], correctAction: 'call', explanation: 'AJ顶对顶踢不能弃也不值得再加注。跟注看转牌。' },
-  { id: 20, title: '两头顺完成', difficulty: '入门', category: '价值下注', heroCards: ['9s', '8s'], board: ['Tc', '7h', '2d', '6c'], situation: '翻牌跟C-Bet。转牌6♣完成顺子。对手再注1/2池。', options: [{ label: '跟注', action: 'call' }, { label: '加注3x', action: 'raise' }, { label: '弃牌', action: 'fold' }], correctAction: 'raise', explanation: '坚果顺子加注榨取价值！' },
+  { id: 20, title: '两头顺完成', difficulty: '入门', category: '价值下注', heroCards: ['9s', '8s'], board: ['Tc', '7h', '2d', '6c'], situation: '翻牌跟C-Bet。转牌6♣完成顺子。对手再注1/2池。', options: [{ label: '跟注', action: 'call' }, { label: '加注3x', action: 'raise' }, { label: '弃牌', action: 'fold' }], correctAction: 'raise', explanation: '你已经做成顺子，通常应继续加注榨取价值并向两对、set、强听牌收费。' },
   { id: 21, title: '多人底池顶对', difficulty: '进阶', category: '多人底池', heroCards: ['Kh', 'Jh'], board: ['Kd', '9s', '6c'], situation: '3人底池。翻牌K♦9♠6♣。BB过牌到你。', options: [{ label: '下注1/2', action: 'bet-medium' }, { label: '下注1/3', action: 'bet-small' }, { label: '过牌', action: 'check' }], correctAction: 'bet-medium', explanation: '3人底池KJ顶对好踢够强下注。' },
   { id: 22, title: '翻牌两对大注', difficulty: '进阶', category: '价值下注', heroCards: ['Ks', 'Ts'], board: ['Kh', 'Td', '4c'], situation: 'BTN open BB跟。翻牌K♥T♦4♣。BB过牌。', options: [{ label: '下注1/3', action: 'bet-small' }, { label: '下注2/3', action: 'bet-medium' }, { label: '过牌', action: 'check' }], correctAction: 'bet-medium', explanation: '两对干燥面非常强。2/3池从Kx/Tx获取价值。' },
   { id: 23, title: '全花面无牌力', difficulty: '进阶', category: '弃牌', heroCards: ['Qc', 'Jd'], board: ['As', '8s', '3s'], situation: '翻牌A♠8♠3♠全花面。你先行动。', options: [{ label: '下注1/3', action: 'bet-small' }, { label: '下注2/3', action: 'bet-medium' }, { label: '过牌', action: 'check' }], correctAction: 'check', explanation: 'QJ无黑桃在全花面零equity。过牌放弃。' },

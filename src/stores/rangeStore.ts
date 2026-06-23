@@ -41,7 +41,10 @@ export const useRangeStore = defineStore('range', () => {
       { action: 'fold' },
       { action: 'mixed', frequency: { raise: 0.5, call: 0.3, fold: 0.2 } }
     ]
-    const currentIdx = cycle.findIndex(c => c.action === currentAction.action)
+    const existing = getCustomRange(position, scenario)?.[handName]
+    const currentIdx = existing
+      ? cycle.findIndex(c => c.action === currentAction.action)
+      : -1
     const nextIdx = (currentIdx + 1) % cycle.length
     const nextAction = cycle[nextIdx]
     setHandAction(position, scenario, handName, nextAction)

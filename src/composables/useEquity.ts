@@ -6,6 +6,10 @@ interface EquityResult {
   tie: number
 }
 
+interface EquityWorkerError {
+  error: string
+}
+
 const isCalculating = ref(false)
 const result = ref<EquityResult | null>(null)
 const error = ref('')
@@ -35,8 +39,16 @@ export function useEquity() {
       worker = null
     }, 10000)
 
-    worker.onmessage = (e: MessageEvent<EquityResult>) => {
+    worker.onmessage = (e: MessageEvent<EquityResult | EquityWorkerError>) => {
       clearTimeout(timeout)
+      if ('error' in e.data) {
+        error.value = e.data.error
+        isCalculating.value = false
+        worker?.terminate()
+        worker = null
+        return
+      }
+
       result.value = e.data
       isCalculating.value = false
       worker?.terminate()

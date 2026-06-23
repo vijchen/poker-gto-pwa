@@ -31,12 +31,26 @@ export function parseCard(rankChar: string, suitIdx: number): CardNum {
 
 export function evaluateHand(cards: CardNum[]): number {
   if (cards.length < 5) return 0
+  if (cards.length === 5) return evaluate5(cards)
+
   let bestScore = 0
-  const combos = combinations(cards, 5)
-  for (const combo of combos) {
-    const score = evaluate5(combo)
-    if (score > bestScore) bestScore = score
+
+  const combo = new Array<CardNum>(5)
+
+  function visit(start: number, depth: number) {
+    if (depth === 5) {
+      const score = evaluate5(combo)
+      if (score > bestScore) bestScore = score
+      return
+    }
+
+    for (let i = start; i <= cards.length - (5 - depth); i++) {
+      combo[depth] = cards[i]
+      visit(i + 1, depth + 1)
+    }
   }
+
+  visit(0, 0)
   return bestScore
 }
 
@@ -80,20 +94,4 @@ function checkStraight(sortedRanks: number[]): boolean {
 function getStraightHigh(sortedRanks: number[]): number {
   if (sortedRanks[0] === 14 && sortedRanks[1] === 5) return 5
   return sortedRanks[0]
-}
-
-function combinations<T>(arr: T[], k: number): T[][] {
-  const result: T[][] = []
-  const n = arr.length
-  const indices = Array.from({ length: k }, (_, i) => i)
-
-  while (true) {
-    result.push(indices.map(i => arr[i]))
-    let i = k - 1
-    while (i >= 0 && indices[i] === n - k + i) i--
-    if (i < 0) break
-    indices[i]++
-    for (let j = i + 1; j < k; j++) indices[j] = indices[j - 1] + 1
-  }
-  return result
 }
