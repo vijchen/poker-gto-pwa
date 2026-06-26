@@ -34,6 +34,9 @@ type RangeWorkerInput = {
 
 type WorkerInput = ExactWorkerInput | RangeWorkerInput
 
+const DEFAULT_TIMEOUT_MS = 10_000
+const MAX_TIMEOUT_MS = 22_000
+
 const isCalculating = ref(false)
 const result = ref<EquityResult | null>(null)
 const error = ref('')
@@ -80,6 +83,23 @@ function ensureWorker() {
   return worker
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
+}
+
+function getTimeoutMs(payload: WorkerInput): number {
+  if (payload.mode === 'exact') {
+    const streetBoost = payload.board.length >= 3 ? 2_000 : 0
+    return DEFAULT_TIMEOUT_MS + streetBoost
+  }
+
+  const matchupCount = payload.villainRange.length * payload.simulations
+  const streetFactor = payload.board.length === 2 ? 1.15 : payload.board.length === 1 ? 1.08 : 1
+  const estimatedExtraMs = Math.ceil((matchupCount * streetFactor) / 28)
+
+  return clamp(DEFAULT_TIMEOUT_MS + estimatedExtraMs, DEFAULT_TIMEOUT_MS, MAX_TIMEOUT_MS)
+}
+
 export function useEquity() {
   function runCalculation(payload: WorkerInput) {
     if (isCalculating.value) return
@@ -97,11 +117,12 @@ export function useEquity() {
     }
 
     clearPendingTimeout()
+    const timeoutMs = getTimeoutMs(payload)
     timeoutId = setTimeout(() => {
       isCalculating.value = false
       error.value = '计算超时，请重试'
       terminateWorker()
-    }, 10000)
+    }, timeoutMs)
 
     worker?.postMessage(payload)
   }

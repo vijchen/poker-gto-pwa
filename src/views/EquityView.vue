@@ -97,6 +97,8 @@ interface PrecisionOption {
   key: RangePrecision
   label: string
   simulations: number
+  minSimulations: number
+  targetMatchups: number
   description: string
 }
 
@@ -125,10 +127,14 @@ const rangeCandidateCache = ref<Partial<Record<Position, RangeCandidate[]>>>({})
 const isRangeLoading = ref(true)
 const rangeLoadError = ref('')
 const precisionOptions: PrecisionOption[] = [
-  { key: 'speed', label: '速度', simulations: 600, description: '更快出结果，适合粗略判断。' },
-  { key: 'balanced', label: '平衡', simulations: 1500, description: '默认推荐，速度和稳定性更均衡。' },
-  { key: 'precise', label: '精准', simulations: 4000, description: '更稳一些，但等待时间会更长。' }
+  { key: 'speed', label: '速度', simulations: 600, minSimulations: 160, targetMatchups: 100000, description: '更快出结果，适合粗略判断。' },
+  { key: 'balanced', label: '平衡', simulations: 1500, minSimulations: 320, targetMatchups: 220000, description: '默认推荐，速度和稳定性更均衡。' },
+  { key: 'precise', label: '精准', simulations: 4000, minSimulations: 700, targetMatchups: 520000, description: '更稳一些，但等待时间会更长。' }
 ]
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
 
 function countHandCombos(handName: string): number {
   if (handName.length === 2) return 6
@@ -271,13 +277,29 @@ const selectedPrecisionOption = computed(
   () => precisionOptions.find((option) => option.key === selectedPrecision.value) ?? precisionOptions[1]
 )
 
+const effectiveRangeSimulations = computed(() => {
+  const option = selectedPrecisionOption.value
+  const boardCount = boardCards.value.length
+  if (boardCount >= 3) return option.simulations
+
+  const candidateCount = Math.max(rangeAvailability.value.count, 1)
+  const streetMultiplier = boardCount === 2 ? 1.4 : boardCount === 1 ? 1.15 : 1
+  const targetByRange = Math.floor((option.targetMatchups * streetMultiplier) / candidateCount)
+
+  return clamp(targetByRange, option.minSimulations, option.simulations)
+})
+
 const precisionHint = computed(() => {
   const street = boardCards.value.length
-  if (street >= 4) {
-    return '当前已进入后街，系统会自动走精确枚举；这个档位主要影响翻牌前和翻牌圈。'
+  if (street >= 3) {
+    return '当前已进入翻牌后阶段，系统会自动走精确枚举；这个档位主要影响翻牌前到两张公共牌的场景。'
   }
 
-  return `${selectedPrecisionOption.value.label}：${selectedPrecisionOption.value.description}`
+  if (effectiveRangeSimulations.value < selectedPrecisionOption.value.simulations) {
+    return `${selectedPrecisionOption.value.label}：${selectedPrecisionOption.value.description} 当前范围较宽，已自动调整为 ${effectiveRangeSimulations.value} 次模拟以避免超时。`
+  }
+
+  return `${selectedPrecisionOption.value.label}：${selectedPrecisionOption.value.description} 当前将运行 ${effectiveRangeSimulations.value} 次模拟。`
 })
 
 const { isCalculating, result, error, calculate, calculateRange, reset } = useEquity()
@@ -309,7 +331,7 @@ function handleCalc() {
       heroCards.value,
       rangeWorkerPayload.value,
       boardCards.value,
-      selectedPrecisionOption.value.simulations
+      effectiveRangeSimulations.value
     )
   }
 }
