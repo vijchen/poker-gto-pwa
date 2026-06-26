@@ -20,18 +20,28 @@ const HAND_RANKS = {
   STRAIGHT_FLUSH: 8
 }
 
+const KICKER_MULTIPLIERS = [50625, 3375, 225, 15, 1]
+const rankScratch = new Uint8Array(5)
+const rankCountsScratch = new Uint8Array(15)
+
 export interface CardNum {
   rank: number
   suit: number
 }
 
 export function parseCard(rankChar: string, suitIdx: number): CardNum {
-  return { rank: RANK_VALUES[rankChar], suit: suitIdx }
+  const rank = RANK_VALUES[rankChar]
+  if (!rank || suitIdx < 0 || suitIdx > 3) {
+    throw new Error(`无效牌面: ${rankChar}`)
+  }
+  return { rank, suit: suitIdx }
 }
 
 export function evaluateHand(cards: CardNum[]): number {
   if (cards.length < 5) return 0
   if (cards.length === 5) return evaluate5(cards)
+  if (cards.length === 6) return evaluate6(cards)
+  if (cards.length === 7) return evaluate7(cards)
 
   let bestScore = 0
 
@@ -55,43 +65,142 @@ export function evaluateHand(cards: CardNum[]): number {
 }
 
 function evaluate5(cards: CardNum[]): number {
-  const ranks = cards.map(c => c.rank).sort((a, b) => b - a)
-  const suits = cards.map(c => c.suit)
-  const isFlush = suits.every(s => s === suits[0])
-  const isStraight = checkStraight(ranks)
+  return evaluate5Cards(cards[0], cards[1], cards[2], cards[3], cards[4])
+}
 
-  const freq: Record<number, number> = {}
-  for (const r of ranks) freq[r] = (freq[r] || 0) + 1
-  const counts = Object.values(freq).sort((a, b) => b - a)
-  const uniqueRanks = Object.keys(freq).map(Number).sort((a, b) => (freq[b] - freq[a]) || (b - a))
+function evaluate6(cards: CardNum[]): number {
+  let bestScore = 0
 
-  let handRank: number
-  let kickers: number[]
+  for (let a = 0; a < 2; a++) {
+    for (let b = a + 1; b < 3; b++) {
+      for (let c = b + 1; c < 4; c++) {
+        for (let d = c + 1; d < 5; d++) {
+          for (let e = d + 1; e < 6; e++) {
+            const score = evaluate5Cards(cards[a], cards[b], cards[c], cards[d], cards[e])
+            if (score > bestScore) bestScore = score
+          }
+        }
+      }
+    }
+  }
 
-  if (isFlush && isStraight) { handRank = HAND_RANKS.STRAIGHT_FLUSH; kickers = [getStraightHigh(ranks)] }
-  else if (counts[0] === 4) { handRank = HAND_RANKS.FOUR_OF_A_KIND; kickers = uniqueRanks }
-  else if (counts[0] === 3 && counts[1] === 2) { handRank = HAND_RANKS.FULL_HOUSE; kickers = uniqueRanks }
-  else if (isFlush) { handRank = HAND_RANKS.FLUSH; kickers = ranks }
-  else if (isStraight) { handRank = HAND_RANKS.STRAIGHT; kickers = [getStraightHigh(ranks)] }
-  else if (counts[0] === 3) { handRank = HAND_RANKS.THREE_OF_A_KIND; kickers = uniqueRanks }
-  else if (counts[0] === 2 && counts[1] === 2) { handRank = HAND_RANKS.TWO_PAIR; kickers = uniqueRanks }
-  else if (counts[0] === 2) { handRank = HAND_RANKS.ONE_PAIR; kickers = uniqueRanks }
-  else { handRank = HAND_RANKS.HIGH_CARD; kickers = ranks }
+  return bestScore
+}
 
+function evaluate7(cards: CardNum[]): number {
+  let bestScore = 0
+
+  for (let a = 0; a < 3; a++) {
+    for (let b = a + 1; b < 4; b++) {
+      for (let c = b + 1; c < 5; c++) {
+        for (let d = c + 1; d < 6; d++) {
+          for (let e = d + 1; e < 7; e++) {
+            const score = evaluate5Cards(cards[a], cards[b], cards[c], cards[d], cards[e])
+            if (score > bestScore) bestScore = score
+          }
+        }
+      }
+    }
+  }
+
+  return bestScore
+}
+
+function evaluate5Cards(card0: CardNum, card1: CardNum, card2: CardNum, card3: CardNum, card4: CardNum): number {
+  const ranks = rankScratch
+  ranks[0] = card0.rank
+  ranks[1] = card1.rank
+  ranks[2] = card2.rank
+  ranks[3] = card3.rank
+  ranks[4] = card4.rank
+
+  for (let i = 1; i < 5; i++) {
+    const value = ranks[i]
+    let j = i - 1
+    while (j >= 0 && ranks[j] < value) {
+      ranks[j + 1] = ranks[j]
+      j--
+    }
+    ranks[j + 1] = value
+  }
+
+  const isFlush =
+    card0.suit === card1.suit &&
+    card0.suit === card2.suit &&
+    card0.suit === card3.suit &&
+    card0.suit === card4.suit
+
+  const straightHigh = getStraightHigh(ranks[0], ranks[1], ranks[2], ranks[3], ranks[4])
+  const counts = rankCountsScratch
+
+  counts[ranks[0]]++
+  counts[ranks[1]]++
+  counts[ranks[2]]++
+  counts[ranks[3]]++
+  counts[ranks[4]]++
+
+  let fourRank = 0
+  let threeRank = 0
+  let pairHigh = 0
+  let pairLow = 0
+  let kicker1 = 0
+  let kicker2 = 0
+  let kicker3 = 0
+  let kickerCount = 0
+
+  for (let rank = 14; rank >= 2; rank--) {
+    const count = counts[rank]
+    if (count === 0) continue
+
+    if (count === 4) {
+      fourRank = rank
+    } else if (count === 3) {
+      threeRank = rank
+    } else if (count === 2) {
+      if (!pairHigh) pairHigh = rank
+      else pairLow = rank
+    } else if (kickerCount === 0) {
+      kicker1 = rank
+      kickerCount = 1
+    } else if (kickerCount === 1) {
+      kicker2 = rank
+      kickerCount = 2
+    } else {
+      kicker3 = rank
+      kickerCount = 3
+    }
+  }
+
+  counts[ranks[0]] = 0
+  counts[ranks[1]] = 0
+  counts[ranks[2]] = 0
+  counts[ranks[3]] = 0
+  counts[ranks[4]] = 0
+
+  if (isFlush && straightHigh) return makeScore(HAND_RANKS.STRAIGHT_FLUSH, straightHigh)
+  if (fourRank) return makeScore(HAND_RANKS.FOUR_OF_A_KIND, fourRank, kicker1)
+  if (threeRank && pairHigh) return makeScore(HAND_RANKS.FULL_HOUSE, threeRank, pairHigh)
+  if (isFlush) return makeScore(HAND_RANKS.FLUSH, ranks[0], ranks[1], ranks[2], ranks[3], ranks[4])
+  if (straightHigh) return makeScore(HAND_RANKS.STRAIGHT, straightHigh)
+  if (threeRank) return makeScore(HAND_RANKS.THREE_OF_A_KIND, threeRank, kicker1, kicker2)
+  if (pairHigh && pairLow) return makeScore(HAND_RANKS.TWO_PAIR, pairHigh, pairLow, kicker1)
+  if (pairHigh) return makeScore(HAND_RANKS.ONE_PAIR, pairHigh, kicker1, kicker2, kicker3)
+  return makeScore(HAND_RANKS.HIGH_CARD, ranks[0], ranks[1], ranks[2], ranks[3], ranks[4])
+}
+
+function getStraightHigh(r0: number, r1: number, r2: number, r3: number, r4: number): number {
+  if (r0 !== r1 && r1 !== r2 && r2 !== r3 && r3 !== r4) {
+    if (r0 - r4 === 4) return r0
+    if (r0 === 14 && r1 === 5 && r2 === 4 && r3 === 3 && r4 === 2) return 5
+  }
+
+  return 0
+}
+
+function makeScore(handRank: number, ...kickers: number[]): number {
   let score = handRank * 10000000
   for (let i = 0; i < kickers.length && i < 5; i++) {
-    score += kickers[i] * Math.pow(15, 4 - i)
+    score += kickers[i] * KICKER_MULTIPLIERS[i]
   }
   return score
-}
-
-function checkStraight(sortedRanks: number[]): boolean {
-  if (sortedRanks[0] - sortedRanks[4] === 4 && new Set(sortedRanks).size === 5) return true
-  if (sortedRanks[0] === 14 && sortedRanks[1] === 5 && sortedRanks[2] === 4 && sortedRanks[3] === 3 && sortedRanks[4] === 2) return true
-  return false
-}
-
-function getStraightHigh(sortedRanks: number[]): number {
-  if (sortedRanks[0] === 14 && sortedRanks[1] === 5) return 5
-  return sortedRanks[0]
 }

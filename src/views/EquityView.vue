@@ -24,6 +24,25 @@
             @click="selectedRange = r.key">{{ r.label }}</button>
         </div>
         <p v-if="isRangeLoading" class="helper-text">正在加载范围数据...</p>
+        <p v-else-if="heroCards.length === 2 && rangeAvailability.count === 0" class="helper-text">
+          当前手牌和公共牌已把这个范围全部阻塞，暂时没有可模拟的对手组合。
+        </p>
+      </div>
+
+      <div class="precision-select">
+        <label>计算精度</label>
+        <div class="precision-options">
+          <button
+            v-for="option in precisionOptions"
+            :key="option.key"
+            :class="['precision-btn', { active: selectedPrecision === option.key }]"
+            @click="selectedPrecision = option.key"
+          >
+            <span>{{ option.label }}</span>
+            <small>{{ option.simulations }} 次</small>
+          </button>
+        </div>
+        <p class="helper-text">{{ precisionHint }}</p>
       </div>
     </template>
 
@@ -52,7 +71,7 @@
     </div>
 
     <div v-if="mode === 'range'" class="range-info">
-      <p>💡 从对手位置的 open 范围中随机抽取手牌模拟，结果为对抗该范围的近似胜率。</p>
+      <p>💡 按对手位置范围中的全部合法组合做加权平均；翻牌后和转牌后会走精确枚举，结果更稳定。</p>
     </div>
   </div>
 </template>
@@ -64,14 +83,52 @@ import CardPicker from '@/components/CardPicker.vue'
 import { useEquity } from '@/composables/useEquity'
 import { loadOpenRanges, type RangeMap } from '@/data/ranges/loaders'
 
+type ConcreteHand = [string, string]
+
+interface RangeCandidate {
+  cards: ConcreteHand
+  weight: number
+  mask: bigint
+}
+
+type RangePrecision = 'speed' | 'balanced' | 'precise'
+
+interface PrecisionOption {
+  key: RangePrecision
+  label: string
+  simulations: number
+  description: string
+}
+
+const SUITS = ['s', 'h', 'd', 'c'] as const
+const RANK_ORDER = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'] as const
+const HAND_NAME_RE = /^(?:[2-9TJQKA]{2}|[2-9TJQKA]{2}[so])$/
+const CARD_BIT_MAP = Object.fromEntries(
+  RANK_ORDER.flatMap((rank, rankIdx) =>
+    SUITS.map((suit, suitIdx) => {
+      const card = rank + suit
+      const cardIdx = rankIdx * SUITS.length + suitIdx
+      return [card, 1n << BigInt(cardIdx)]
+    })
+  )
+) as Record<string, bigint>
+const handComboCache = new Map<string, Array<{ cards: ConcreteHand; mask: bigint }>>()
+
 const mode = ref<'hand' | 'range'>('range')
 const heroCards = ref<string[]>([])
 const villainCards = ref<string[]>([])
 const boardCards = ref<string[]>([])
-const selectedRange = ref('CO')
+const selectedRange = ref<Position>('CO')
+const selectedPrecision = ref<RangePrecision>('balanced')
 const openRanges = ref<RangeMap | null>(null)
+const rangeCandidateCache = ref<Partial<Record<Position, RangeCandidate[]>>>({})
 const isRangeLoading = ref(true)
 const rangeLoadError = ref('')
+const precisionOptions: PrecisionOption[] = [
+  { key: 'speed', label: '速度', simulations: 600, description: '更快出结果，适合粗略判断。' },
+  { key: 'balanced', label: '平衡', simulations: 1500, description: '默认推荐，速度和稳定性更均衡。' },
+  { key: 'precise', label: '精准', simulations: 4000, description: '更稳一些，但等待时间会更长。' }
+]
 
 function countHandCombos(handName: string): number {
   if (handName.length === 2) return 6
@@ -103,11 +160,132 @@ const rangePresets = computed(() => rangePositions.map((position) => ({
   label: openRanges.value ? `${position} ${getOpenPct(position)}%` : position
 })))
 
-const { isCalculating, result, error, calculate, reset } = useEquity()
+function getCardBit(card: string): bigint {
+  return CARD_BIT_MAP[card] ?? 0n
+}
+
+function getHandMask(cards: readonly string[]): bigint {
+  let mask = 0n
+  for (const card of cards) {
+    mask |= getCardBit(card)
+  }
+  return mask
+}
+
+function getCombosForHand(name: string): Array<{ cards: ConcreteHand; mask: bigint }> {
+  const cached = handComboCache.get(name)
+  if (cached) return cached
+  if (!HAND_NAME_RE.test(name)) return []
+
+  const combos: ConcreteHand[] = []
+
+  if (name.length === 2) {
+    const rank = name[0]
+    for (let i = 0; i < SUITS.length; i++) {
+      for (let j = i + 1; j < SUITS.length; j++) {
+        const first = rank + SUITS[i]
+        const second = rank + SUITS[j]
+        combos.push([first, second])
+      }
+    }
+  } else {
+    const firstRank = name[0]
+    const secondRank = name[1]
+    const isSuited = name[2] === 's'
+
+    for (const firstSuit of SUITS) {
+      for (const secondSuit of SUITS) {
+        if (isSuited && firstSuit !== secondSuit) continue
+        if (!isSuited && firstSuit === secondSuit) continue
+
+        const first = firstRank + firstSuit
+        const second = secondRank + secondSuit
+        combos.push([first, second])
+      }
+    }
+  }
+
+  const comboEntries = combos.map((cards) => ({
+    cards,
+    mask: getHandMask(cards)
+  }))
+
+  handComboCache.set(name, comboEntries)
+  return comboEntries
+}
+
+function buildRangeCandidateCache(rangeMap: RangeMap): Partial<Record<Position, RangeCandidate[]>> {
+  const cache: Partial<Record<Position, RangeCandidate[]>> = {}
+
+  for (const position of rangePositions) {
+    const posData = rangeMap[position]
+    if (!posData) continue
+
+    const candidates: RangeCandidate[] = []
+    for (const [handName, action] of Object.entries(posData)) {
+      const weight = getActionWeight(action)
+      if (weight <= 0) continue
+
+      const combos = getCombosForHand(handName)
+      for (const combo of combos) {
+        candidates.push({
+          cards: combo.cards,
+          weight,
+          mask: combo.mask
+        })
+      }
+    }
+
+    cache[position] = candidates
+  }
+
+  return cache
+}
+
+const blockedMask = computed(() => getHandMask([...heroCards.value, ...boardCards.value]))
+
+const availableRangeCandidates = computed(() => {
+  const candidates = rangeCandidateCache.value[selectedRange.value] ?? []
+  const mask = blockedMask.value
+
+  return candidates.filter((candidate) => (candidate.mask & mask) === 0n)
+})
+
+const rangeAvailability = computed(() => {
+  let totalWeight = 0
+  for (const candidate of availableRangeCandidates.value) {
+    totalWeight += candidate.weight
+  }
+
+  return {
+    count: availableRangeCandidates.value.length,
+    totalWeight
+  }
+})
+
+const rangeWorkerPayload = computed(() =>
+  availableRangeCandidates.value.map(({ cards, weight }) => ({ cards, weight }))
+)
+
+const selectedPrecisionOption = computed(
+  () => precisionOptions.find((option) => option.key === selectedPrecision.value) ?? precisionOptions[1]
+)
+
+const precisionHint = computed(() => {
+  const street = boardCards.value.length
+  if (street >= 4) {
+    return '当前已进入后街，系统会自动走精确枚举；这个档位主要影响翻牌前和翻牌圈。'
+  }
+
+  return `${selectedPrecisionOption.value.label}：${selectedPrecisionOption.value.description}`
+})
+
+const { isCalculating, result, error, calculate, calculateRange, reset } = useEquity()
 
 onMounted(async () => {
   try {
     openRanges.value = await loadOpenRanges()
+    rangeCandidateCache.value = buildRangeCandidateCache(openRanges.value)
   } catch {
     rangeLoadError.value = '范围数据加载失败，请稍后重试。'
   } finally {
@@ -118,61 +296,31 @@ onMounted(async () => {
 const canCalc = computed(() => {
   if (heroCards.value.length !== 2) return false
   if (mode.value === 'hand' && villainCards.value.length !== 2) return false
-  if (mode.value === 'range' && (!openRanges.value || isRangeLoading.value)) return false
+  if (mode.value === 'range' && (!openRanges.value || isRangeLoading.value || rangeAvailability.value.count === 0)) return false
   return true
 })
-
-function handNameToCards(name: string, exclude: string[]): [string, string] | null {
-  const suits = ['s', 'h', 'd', 'c']
-  if (name.length === 2) {
-    const r = name[0]
-    const avail = suits.filter(s => !exclude.includes(r + s))
-    if (avail.length < 2) return null
-    const i = Math.floor(Math.random() * avail.length)
-    let j = Math.floor(Math.random() * (avail.length - 1)); if (j >= i) j++
-    return [r + avail[i], r + avail[j]]
-  }
-  const r1 = name[0], r2 = name[1], suited = name[2] === 's'
-  if (suited) {
-    const avail = suits.filter(s => !exclude.includes(r1 + s) && !exclude.includes(r2 + s))
-    if (avail.length === 0) return null
-    const s = avail[Math.floor(Math.random() * avail.length)]
-    return [r1 + s, r2 + s]
-  } else {
-    const a1 = suits.filter(s => !exclude.includes(r1 + s))
-    if (a1.length === 0) return null
-    const s1 = a1[Math.floor(Math.random() * a1.length)]
-    const a2 = suits.filter(s => s !== s1 && !exclude.includes(r2 + s))
-    if (a2.length === 0) return null
-    const s2 = a2[Math.floor(Math.random() * a2.length)]
-    return [r1 + s1, r2 + s2]
-  }
-}
 
 function handleCalc() {
   if (mode.value === 'hand') {
     calculate(heroCards.value, villainCards.value, boardCards.value)
   } else {
-    const posData = openRanges.value?.[selectedRange.value]
-    if (!posData) return
-    const playable = Object.entries(posData).filter(([_, v]: any) => v.action === 'raise' || v.action === 'mixed').map(([k]) => k)
-    if (playable.length === 0) return
-    const exclude = [...heroCards.value, ...boardCards.value]
-    const handName = playable[Math.floor(Math.random() * playable.length)]
-    const vCards = handNameToCards(handName, exclude)
-    if (!vCards) {
-      const h2 = playable[Math.floor(Math.random() * playable.length)]
-      const v2 = handNameToCards(h2, exclude)
-      if (!v2) return
-      calculate(heroCards.value, v2, boardCards.value)
-      return
-    }
-    calculate(heroCards.value, vCards, boardCards.value)
+    if (rangeWorkerPayload.value.length === 0) return
+    calculateRange(
+      heroCards.value,
+      rangeWorkerPayload.value,
+      boardCards.value,
+      selectedPrecisionOption.value.simulations
+    )
   }
 }
 
 function handleReset() {
-  heroCards.value = []; villainCards.value = []; boardCards.value = []; selectedRange.value = 'CO'; reset()
+  heroCards.value = []
+  villainCards.value = []
+  boardCards.value = []
+  selectedRange.value = 'CO'
+  selectedPrecision.value = 'balanced'
+  reset()
 }
 </script>
 
@@ -185,9 +333,32 @@ function handleReset() {
 .range-select { padding: 12px 0; }
 .range-select label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px; }
 .range-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.precision-select { padding-bottom: 12px; }
+.precision-select label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px; }
+.precision-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .helper-text { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
 .range-btn { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; }
 .range-btn.active { background: var(--accent-green-dim); border-color: var(--border-active); color: var(--accent-green); }
+.precision-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.precision-btn span { font-size: 12px; font-weight: 700; }
+.precision-btn small { font-size: 10px; color: var(--text-muted); }
+.precision-btn.active {
+  background: var(--accent-green-dim);
+  border-color: var(--border-active);
+  color: var(--accent-green);
+}
+.precision-btn.active small { color: var(--accent-green); opacity: 0.85; }
 .action-area { display: flex; gap: 10px; padding: 16px 0; }
 .calc-btn { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--accent-green); color: #000; font-size: 16px; font-weight: 700; cursor: pointer; }
 .calc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -203,4 +374,8 @@ function handleReset() {
 .range-info p { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
 .error-card { margin-top: 12px; padding: 14px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; }
 .error-card p { font-size: 13px; color: #f87171; }
+
+@media (max-width: 420px) {
+  .precision-options { grid-template-columns: 1fr; }
+}
 </style>
