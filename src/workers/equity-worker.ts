@@ -40,6 +40,12 @@ interface WorkerErrorOutput {
   error: string
 }
 
+interface WorkerProgressOutput {
+  kind: 'progress'
+  completed: number
+  total: number
+}
+
 interface DeckEntry {
   num: CardNum
   maskLo: number
@@ -114,6 +120,23 @@ function compareScores(heroScore: number, villainScore: number): number {
   if (heroScore > villainScore) return 1
   if (villainScore > heroScore) return -1
   return 0
+}
+
+function createProgressReporter(total: number) {
+  let lastReportedAt = 0
+
+  return (completed: number) => {
+    const now = Date.now()
+    if (completed < total && now - lastReportedAt < 450) return
+
+    const progress: WorkerProgressOutput = {
+      kind: 'progress',
+      completed,
+      total
+    }
+    self.postMessage(progress)
+    lastReportedAt = now
+  }
 }
 
 function fillRandomRunout(
@@ -265,6 +288,12 @@ function runExactSimulation(input: ExactWorkerInput): WorkerOutput {
   let heroWins = 0
   let villainWins = 0
   let ties = 0
+  const totalIterations =
+    cardsNeeded === 0 ? 1 :
+    cardsNeeded === 1 ? deck.length :
+    cardsNeeded === 2 ? (deck.length * (deck.length - 1)) / 2 :
+    simulations
+  const reportProgress = createProgressReporter(totalIterations)
 
   function applyExactResult(): void {
     const result = compareScores(evaluateHand(heroNums), evaluateHand(villainNums))
@@ -275,23 +304,30 @@ function runExactSimulation(input: ExactWorkerInput): WorkerOutput {
 
   if (cardsNeeded === 0) {
     applyExactResult()
+    reportProgress(1)
   } else if (cardsNeeded === 1) {
-    for (const river of deck) {
+    for (let i = 0; i < deck.length; i++) {
+      const river = deck[i]
       setSharedRunoutCard(river, heroNums, villainNums, drawnStart)
       applyExactResult()
+      reportProgress(i + 1)
     }
   } else if (cardsNeeded === 2) {
+    let completed = 0
     for (let i = 0; i < deck.length - 1; i++) {
       for (let j = i + 1; j < deck.length; j++) {
         setSharedRunoutCard(deck[i], heroNums, villainNums, drawnStart)
         setSharedRunoutCard(deck[j], heroNums, villainNums, drawnStart + 1)
         applyExactResult()
+        completed++
+        reportProgress(completed)
       }
     }
   } else {
     for (let i = 0; i < simulations; i++) {
       fillRandomRunout(deck, cardsNeeded, heroNums, villainNums, drawnStart, runoutMask)
       applyExactResult()
+      reportProgress(i + 1)
     }
   }
 
@@ -321,6 +357,12 @@ function runRangeSimulation(input: RangeWorkerInput): WorkerOutput {
   let villainUnits = 0
   let tieUnits = 0
   let totalUnits = 0
+  const totalIterations =
+    cardsNeeded === 0 ? 1 :
+    cardsNeeded === 1 ? deck.length :
+    cardsNeeded === 2 ? (deck.length * (deck.length - 1)) / 2 :
+    simulations
+  const reportProgress = createProgressReporter(totalIterations)
 
   function applyRangeRunout(runoutMaskLo: number, runoutMaskHi: number): void {
     const heroScore = evaluateHand(heroNums)
@@ -343,12 +385,16 @@ function runRangeSimulation(input: RangeWorkerInput): WorkerOutput {
 
   if (cardsNeeded === 0) {
     applyRangeRunout(0, 0)
+    reportProgress(1)
   } else if (cardsNeeded === 1) {
-    for (const river of deck) {
+    for (let i = 0; i < deck.length; i++) {
+      const river = deck[i]
       setSharedRunoutCard(river, heroNums, villainNums, drawnStart)
       applyRangeRunout(river.maskLo, river.maskHi)
+      reportProgress(i + 1)
     }
   } else if (cardsNeeded === 2) {
+    let completed = 0
     for (let i = 0; i < deck.length - 1; i++) {
       for (let j = i + 1; j < deck.length; j++) {
         setSharedRunoutCard(deck[i], heroNums, villainNums, drawnStart)
@@ -357,12 +403,15 @@ function runRangeSimulation(input: RangeWorkerInput): WorkerOutput {
           (deck[i].maskLo | deck[j].maskLo) >>> 0,
           (deck[i].maskHi | deck[j].maskHi) >>> 0
         )
+        completed++
+        reportProgress(completed)
       }
     }
   } else {
     for (let i = 0; i < simulations; i++) {
       fillRandomRunout(deck, cardsNeeded, heroNums, villainNums, drawnStart, runoutMask)
       applyRangeRunout(runoutMask[0], runoutMask[1])
+      reportProgress(i + 1)
     }
   }
 

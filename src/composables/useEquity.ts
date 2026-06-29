@@ -10,6 +10,12 @@ interface EquityWorkerError {
   error: string
 }
 
+interface EquityWorkerProgress {
+  kind: 'progress'
+  completed: number
+  total: number
+}
+
 interface RangeHandInput {
   cards: [string, string]
   weight: number
@@ -42,12 +48,22 @@ const result = ref<EquityResult | null>(null)
 const error = ref('')
 let worker: Worker | null = null
 let timeoutId: ReturnType<typeof setTimeout> | null = null
+let activeTimeoutMs = DEFAULT_TIMEOUT_MS
 
 function clearPendingTimeout() {
   if (timeoutId) {
     clearTimeout(timeoutId)
     timeoutId = null
   }
+}
+
+function armTimeout() {
+  clearPendingTimeout()
+  timeoutId = setTimeout(() => {
+    isCalculating.value = false
+    error.value = '计算超时，请重试'
+    terminateWorker()
+  }, activeTimeoutMs)
 }
 
 function terminateWorker() {
@@ -58,9 +74,14 @@ function terminateWorker() {
 function ensureWorker() {
   if (worker) return worker
 
-  worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url))
+  worker = new Worker(new URL('../workers/equity-worker.ts', import.meta.url), { type: 'module' })
 
-  worker.onmessage = (e: MessageEvent<EquityResult | EquityWorkerError>) => {
+  worker.onmessage = (e: MessageEvent<EquityResult | EquityWorkerError | EquityWorkerProgress>) => {
+    if ('kind' in e.data && e.data.kind === 'progress') {
+      armTimeout()
+      return
+    }
+
     clearPendingTimeout()
 
     if ('error' in e.data) {
@@ -69,7 +90,7 @@ function ensureWorker() {
       return
     }
 
-    result.value = e.data
+    result.value = e.data as EquityResult
     isCalculating.value = false
   }
 
@@ -100,6 +121,33 @@ function getTimeoutMs(payload: WorkerInput): number {
   return clamp(DEFAULT_TIMEOUT_MS + estimatedExtraMs, DEFAULT_TIMEOUT_MS, MAX_TIMEOUT_MS)
 }
 
+function cloneExactPayload(payload: ExactWorkerInput): ExactWorkerInput {
+  return {
+    ...payload,
+    heroCards: [payload.heroCards[0], payload.heroCards[1]],
+    villainCards: [payload.villainCards[0], payload.villainCards[1]],
+    board: [...payload.board]
+  }
+}
+
+function cloneRangePayload(payload: RangeWorkerInput): RangeWorkerInput {
+  return {
+    ...payload,
+    heroCards: [payload.heroCards[0], payload.heroCards[1]],
+    board: [...payload.board],
+    villainRange: payload.villainRange.map((hand) => ({
+      cards: [hand.cards[0], hand.cards[1]],
+      weight: hand.weight
+    }))
+  }
+}
+
+function toWorkerPayload(payload: WorkerInput): WorkerInput {
+  return payload.mode === 'range'
+    ? cloneRangePayload(payload)
+    : cloneExactPayload(payload)
+}
+
 export function useEquity() {
   function runCalculation(payload: WorkerInput) {
     if (isCalculating.value) return
@@ -117,14 +165,10 @@ export function useEquity() {
     }
 
     clearPendingTimeout()
-    const timeoutMs = getTimeoutMs(payload)
-    timeoutId = setTimeout(() => {
-      isCalculating.value = false
-      error.value = '计算超时，请重试'
-      terminateWorker()
-    }, timeoutMs)
+    activeTimeoutMs = getTimeoutMs(payload)
+    armTimeout()
 
-    worker?.postMessage(payload)
+    worker?.postMessage(toWorkerPayload(payload))
   }
 
   function calculate(heroCards: string[], villainCards: string[], board: string[], simulations = 10000) {
